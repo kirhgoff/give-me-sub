@@ -9,7 +9,7 @@ final class SystemAudioTap {
     private(set) var format: AVAudioFormat!
 
     func start(onBuffer: @escaping (AVAudioPCMBuffer) -> Void) throws {
-        let targets = processObjects(bundleID: "com.apple.WebKit.GPU")
+        let targets = processObjects(bundleIDs: ["com.apple.WebKit.GPU", "app.zen-browser.zen", "org.mozilla.firefox"])
         let description = targets.isEmpty
             ? CATapDescription(monoGlobalTapButExcludeProcesses: [])
             : CATapDescription(monoMixdownOfProcesses: targets)
@@ -65,7 +65,7 @@ final class SystemAudioTap {
     }
 
     // ponytail: taps every WebKit GPU process (Mail, etc. too); match parent pid to Safari if it ever matters
-    private func processObjects(bundleID: String) -> [AudioObjectID] {
+    private func processObjects(bundleIDs: Set<String>) -> [AudioObjectID] {
         var addr = address(kAudioHardwarePropertyProcessObjectList)
         var size: UInt32 = 0
         let system = AudioObjectID(kAudioObjectSystemObject)
@@ -75,7 +75,7 @@ final class SystemAudioTap {
         return ids.filter { id in
             var name: Unmanaged<CFString>?
             guard (try? read(id, kAudioProcessPropertyBundleID, &name)) != nil else { return false }
-            return name?.takeRetainedValue() as String? == bundleID
+            return bundleIDs.contains(name?.takeRetainedValue() as String? ?? "")
         }
     }
 

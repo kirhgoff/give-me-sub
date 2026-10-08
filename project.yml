@@ -40,7 +40,7 @@ targets:
       path: App/Info.plist
       properties:
         LSUIElement: true
-        NSAudioCaptureUsageDescription: Captures Safari's audio to generate live captions.
+        NSAudioCaptureUsageDescription: Captures browser audio to generate live captions.
   GiveMeSubExtension:
     type: app-extension
     platform: macOS
