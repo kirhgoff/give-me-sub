@@ -1,0 +1,6 @@
+module CNeedle {
+    header "needle.h"
+    link "needle"
+    link "c++"
+    export *
+}

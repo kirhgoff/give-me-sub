@@ -1,0 +1,93 @@
+name: GiveMeSub
+options:
+  bundleIdPrefix: com.kirill
+  deploymentTarget:
+    macOS: "26.0"
+  xcodeVersion: "27.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+targets:
+  GiveMeSub:
+    type: application
+    platform: macOS
+    sources:
+      - App
+      - Shared
+      - path: Vendor/whistle.cact
+        buildPhase: resources
+    dependencies:
+      - target: GiveMeSubExtension
+      - sdk: CoreAudio.framework
+      - sdk: AVFoundation.framework
+      - sdk: SafariServices.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kirill.givemesub
+        SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
+        LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
+        OTHER_LDFLAGS: -lneedle -lc++
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: App/Info.plist
+      properties:
+        LSUIElement: true
+        NSAudioCaptureUsageDescription: Captures Safari's audio to generate live captions.
+  GiveMeSubExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Extension/SafariWebExtensionHandler.swift
+      - path: Extension/Resources
+        buildPhase: resources
+    dependencies:
+      - sdk: SafariServices.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kirill.givemesub.Extension
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: Extension/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    entitlements:
+      path: Extension/GiveMeSubExtension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+  GiveMeSubTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests
+      - Shared
+      - path: Vendor/whistle.cact
+        buildPhase: resources
+    dependencies:
+      - sdk: AVFoundation.framework
+    settings:
+      base:
+        SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
+        LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
+        OTHER_LDFLAGS: -lneedle -lc++
+        ENABLE_APP_SANDBOX: NO
+schemes:
+  GiveMeSub:
+    build:
+      targets:
+        GiveMeSub: all
+        GiveMeSubTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - GiveMeSubTests
