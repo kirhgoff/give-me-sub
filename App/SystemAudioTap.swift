@@ -64,6 +64,7 @@ final class SystemAudioTap {
         try check(AudioObjectGetPropertyData(id, &addr, 0, nil, &size, &value))
     }
 
+    // ponytail: taps every WebKit GPU process (Mail, etc. too); match parent pid to Safari if it ever matters
     private func processObjects(bundleID: String) -> [AudioObjectID] {
         var addr = address(kAudioHardwarePropertyProcessObjectList)
         var size: UInt32 = 0
