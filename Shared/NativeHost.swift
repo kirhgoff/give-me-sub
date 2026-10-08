@@ -24,7 +24,7 @@ enum NativeHost {
         return Data(bytes: &length, count: 4) + json
     }
 
-    // ponytail: argv-detected host mode shares the app binary; split into its own target if the app ever takes launch arguments
+    // ponytail: host mode is detected by Firefox appending the extension id as the last argv; split into its own target if that stops holding
     static func serve() -> Never {
         let observer = DistributedNotificationCenter.default().addObserver(forName: caption, object: nil, queue: nil) {
             FileHandle.standardOutput.write(frame($0.userInfo as? [String: Any] ?? [:]))
