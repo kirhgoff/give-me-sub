@@ -56,8 +56,9 @@ import Observation
     private func publish(_ segment: WhistleSegment) {
         guard !segment.text.isEmpty || !segment.pending.isEmpty else { return }
         DispatchQueue.main.async { self.lastText = segment.text }
-        SFSafariApplication.dispatchMessage(withName: "caption", toExtensionWithIdentifier: "com.kirill.givemesub.Extension",
-            userInfo: ["text": segment.text, "pending": segment.pending, "received": segment.received]) { error in
+        let payload: [String: Any] = ["text": segment.text, "pending": segment.pending, "received": segment.received]
+        DistributedNotificationCenter.default().postNotificationName(NativeHost.caption, object: nil, userInfo: payload, deliverImmediately: true)
+        SFSafariApplication.dispatchMessage(withName: "caption", toExtensionWithIdentifier: "com.kirill.givemesub.Extension", userInfo: payload) { error in
             if let error { NSLog("dispatch failed: %@", "\(error)") }
         }
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-@main struct GiveMeSubApp: App {
+struct GiveMeSubApp: App {
     @State private var captioner = Captioner()
     private let languages: [(String, String?)] = [("Auto", nil), ("English", "en"), ("German", "de"), ("French", "fr"), ("Spanish", "es"), ("Italian", "it"), ("Dutch", "nl"), ("Polish", "pl")]
 
