@@ -12,6 +12,10 @@ settings:
     DEVELOPMENT_TEAM: ""
     MACOSX_DEPLOYMENT_TARGET: "26.0"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
+    ARCHS: arm64
+    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: "0.0.0"
+    CURRENT_PROJECT_VERSION: "0"
 targets:
   GiveMeSub:
     type: application
@@ -20,6 +24,8 @@ targets:
       - App
       - Shared
       - path: Vendor/whistle.cact
+        buildPhase: resources
+      - path: Vendor/NOTICE
         buildPhase: resources
     dependencies:
       - target: GiveMeSubExtension
@@ -32,13 +38,17 @@ targets:
         SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
         LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
         OTHER_LDFLAGS: -lneedle -lc++
-        # ponytail: unsandboxed app; add com.apple.security.app-sandbox + audio-input entitlement only if shipping
         ENABLE_APP_SANDBOX: NO
-        ENABLE_HARDENED_RUNTIME: NO
         GENERATE_INFOPLIST_FILE: YES
+    entitlements:
+      path: App/GiveMeSub.entitlements
+      properties:
+        com.apple.security.device.audio-input: true
     info:
       path: App/Info.plist
       properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSUIElement: true
         NSAudioCaptureUsageDescription: Captures system audio to generate live captions.
         CFBundleURLTypes:
@@ -60,6 +70,8 @@ targets:
     info:
       path: Extension/Info.plist
       properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.Safari.web-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler

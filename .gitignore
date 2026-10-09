@@ -5,3 +5,6 @@ Vendor/whistle.cact
 App/Info.plist
 Extension/Info.plist
 Extension/GiveMeSubExtension.entitlements
+.env
+App/GiveMeSub.entitlements
+build/
