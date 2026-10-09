@@ -41,6 +41,9 @@ targets:
       properties:
         LSUIElement: true
         NSAudioCaptureUsageDescription: Captures system audio to generate live captions.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.kirill.givemesub
+            CFBundleURLSchemes: [givemesub]
   GiveMeSubExtension:
     type: app-extension
     platform: macOS

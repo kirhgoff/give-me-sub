@@ -34,16 +34,25 @@ final class CaptionOverlay {
 
     func show(text: String, pending: String) {
         if !text.isEmpty { committed = (committed + " " + text).split(separator: " ").suffix(18).joined(separator: " ") }
-        let view = NSHostingView(rootView: CaptionView(committed: committed, pending: pending))
-        panel.contentView = view
-        let size = view.fittingSize
+        present(CaptionView(committed: committed, pending: pending), hideAfter: 4)
+    }
+
+    func flash(_ text: String) {
+        committed = ""
+        present(CaptionView(committed: text, pending: ""), hideAfter: 1)
+    }
+
+    private func present(_ view: CaptionView, hideAfter seconds: TimeInterval) {
+        let host = NSHostingView(rootView: view)
+        panel.contentView = host
+        let size = host.fittingSize
         if let screen = NSScreen.main {
             let origin = NSPoint(x: screen.frame.midX - size.width / 2, y: screen.visibleFrame.minY + screen.frame.height * 0.1)
             panel.setFrame(NSRect(origin: origin, size: size), display: true)
         }
         panel.orderFrontRegardless()
         hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { [weak self] _ in
+        hideTimer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: false) { [weak self] _ in
             self?.panel.orderOut(nil)
             self?.committed = ""
         }

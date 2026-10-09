@@ -16,20 +16,22 @@ import Observation
 
     func toggle() { isRunning ? stop() : start() }
 
-    private func start() {
+    func start() {
         do {
             if !loaded { try whistle.load(modelURL: Bundle.main.url(forResource: "whistle", withExtension: "cact")!); loaded = true }
             try tap.start { [weak self] buffer in self?.ingest(buffer) }
             converter = AVAudioConverter(from: tap.format, to: target)
             isRunning = true
+            overlay.flash("Captions on")
         } catch { NSLog("start failed: %@", "\(error)") }
     }
 
-    private func stop() {
+    func stop() {
         tap.stop()
         whistle.stop { [weak self] in self?.publish($0) }
         pending.removeAll()
         isRunning = false
+        overlay.flash("Captions off")
     }
 
     private func ingest(_ buffer: AVAudioPCMBuffer) {
