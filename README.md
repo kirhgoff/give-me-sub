@@ -1,6 +1,6 @@
 # GiveMeSub
 
-Live on-device captions for browser videos. A menu bar app taps the browser's audio (Safari's WebKit GPU process, or Zen/Firefox's main process) with a Core Audio process tap, transcribes it locally with the Whistle speech model, and sends the words to a web extension that overlays them on the playing video. One extension folder serves both Safari (bundled .appex) and Zen/Firefox (native messaging to the same app binary).
+Live on-device captions for whatever your Mac plays. A menu bar app taps all system audio with a Core Audio process tap, transcribes it locally with the Whistle speech model, and shows the words in a floating overlay above every window, fullscreen apps included. The browser extension is optional: it places the captions on the playing video instead. One extension folder serves both Safari (bundled .appex) and Zen/Firefox (native messaging to the same app binary).
 
 ## Setup
 
@@ -26,7 +26,7 @@ Temporary add-ons vanish when the browser quits. Permanent: set `xpinstall.signa
 
 ## Use
 
-Play a video, click the menu bar icon > Start captions. Pick a language if autodetect misfires.
+Play anything with audio, click the menu bar icon > Start captions. Pick a language if autodetect misfires.
 
 ## Check
 
@@ -34,6 +34,9 @@ Product > Test (`GiveMeSubTests`); it synthesizes speech with `say` and checks t
 
 ## Known limits
 
-- Native `<video>` fullscreen has no overlay.
 - Ad-hoc signing may re-prompt the audio permission after rebuilds; set `DEVELOPMENT_TEAM` and `CODE_SIGN_STYLE: Automatic` in `project.yml` to avoid it.
-- Every WebKit GPU process and every Zen/Firefox window is captured, so other WebKit apps' and other browser tabs' audio leaks in.
+- All system audio is captioned, so notifications and other apps' sound are transcribed too.
+
+## License
+
+MIT. The vendored needle library and whistle model are Apache-2.0 (Cactus Compute).

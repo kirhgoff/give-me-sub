@@ -9,10 +9,7 @@ final class SystemAudioTap {
     private(set) var format: AVAudioFormat!
 
     func start(onBuffer: @escaping (AVAudioPCMBuffer) -> Void) throws {
-        let targets = processObjects(bundleIDs: ["com.apple.WebKit.GPU", "app.zen-browser.zen", "org.mozilla.firefox"])
-        let description = targets.isEmpty
-            ? CATapDescription(monoGlobalTapButExcludeProcesses: [])
-            : CATapDescription(monoMixdownOfProcesses: targets)
+        let description = CATapDescription(monoGlobalTapButExcludeProcesses: [])
         description.uuid = UUID()
         description.isPrivate = true
         description.muteBehavior = .unmuted
@@ -62,21 +59,6 @@ final class SystemAudioTap {
         var addr = address(selector)
         var size = UInt32(MemoryLayout<T>.size)
         try check(AudioObjectGetPropertyData(id, &addr, 0, nil, &size, &value))
-    }
-
-    // ponytail: taps every WebKit GPU process (Mail, etc. too); match parent pid to Safari if it ever matters
-    private func processObjects(bundleIDs: Set<String>) -> [AudioObjectID] {
-        var addr = address(kAudioHardwarePropertyProcessObjectList)
-        var size: UInt32 = 0
-        let system = AudioObjectID(kAudioObjectSystemObject)
-        guard AudioObjectGetPropertyDataSize(system, &addr, 0, nil, &size) == noErr else { return [] }
-        var ids = [AudioObjectID](repeating: 0, count: Int(size) / MemoryLayout<AudioObjectID>.size)
-        guard AudioObjectGetPropertyData(system, &addr, 0, nil, &size, &ids) == noErr else { return [] }
-        return ids.filter { id in
-            var name: Unmanaged<CFString>?
-            guard (try? read(id, kAudioProcessPropertyBundleID, &name)) != nil else { return false }
-            return bundleIDs.contains(name?.takeRetainedValue() as String? ?? "")
-        }
     }
 
     private func defaultOutputUID() throws -> String {

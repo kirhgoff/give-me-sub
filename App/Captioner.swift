@@ -7,6 +7,7 @@ import Observation
     var language: String? = nil
     var lastText = ""
     @ObservationIgnored private let whistle = Whistle()
+    @ObservationIgnored private let overlay = CaptionOverlay()
     @ObservationIgnored private let tap = SystemAudioTap()
     @ObservationIgnored private var converter: AVAudioConverter?
     @ObservationIgnored private var pending = [Float]()
@@ -55,7 +56,10 @@ import Observation
 
     private func publish(_ segment: WhistleSegment) {
         guard !segment.text.isEmpty || !segment.pending.isEmpty else { return }
-        DispatchQueue.main.async { self.lastText = segment.text }
+        DispatchQueue.main.async {
+            self.lastText = segment.text
+            self.overlay.show(text: segment.text, pending: segment.pending)
+        }
         let payload: [String: Any] = ["text": segment.text, "pending": segment.pending, "received": segment.received]
         DistributedNotificationCenter.default().postNotificationName(NativeHost.caption, object: nil, userInfo: payload, deliverImmediately: true)
         SFSafariApplication.dispatchMessage(withName: "caption", toExtensionWithIdentifier: "com.kirill.givemesub.Extension", userInfo: payload) { error in
