@@ -32,6 +32,7 @@ targets:
         SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
         LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
         OTHER_LDFLAGS: -lneedle -lc++
+        # ponytail: unsandboxed app; add com.apple.security.app-sandbox + audio-input entitlement only if shipping
         ENABLE_APP_SANDBOX: NO
         ENABLE_HARDENED_RUNTIME: NO
         GENERATE_INFOPLIST_FILE: YES
@@ -39,7 +40,7 @@ targets:
       path: App/Info.plist
       properties:
         LSUIElement: true
-        NSAudioCaptureUsageDescription: Captures Safari's audio to generate live captions.
+        NSAudioCaptureUsageDescription: Captures system audio to generate live captions.
   GiveMeSubExtension:
     type: app-extension
     platform: macOS
@@ -79,6 +80,7 @@ targets:
         LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
         OTHER_LDFLAGS: -lneedle -lc++
         ENABLE_APP_SANDBOX: NO
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   GiveMeSub:
     build:

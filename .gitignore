@@ -2,3 +2,6 @@ GiveMeSub.xcodeproj/
 Vendor/needle/libneedle.a
 Vendor/whistle.cact
 .DS_Store
+App/Info.plist
+Extension/Info.plist
+Extension/GiveMeSubExtension.entitlements
