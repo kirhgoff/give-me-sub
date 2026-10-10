@@ -75,5 +75,3 @@ custom_rules:
     regex: '\.foregroundColor\('
     message: "Use foregroundStyle"
     severity: error
-
-baseline: .swiftlint-baseline.json
