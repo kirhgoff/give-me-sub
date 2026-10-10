@@ -6,3 +6,6 @@ App/Info.plist
 .env
 App/GiveMeSub.entitlements
 build/
+DerivedData/
+.build/
+xcuserdata/
