@@ -1,7 +1,7 @@
 import ServiceManagement
 import SwiftUI
 
-struct GiveMeSubApp: App {
+@main struct GiveMeSubApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     private let languages: [(String, String?)] = [("Auto", nil), ("English", "en"), ("German", "de"), ("French", "fr"), ("Spanish", "es"), ("Italian", "it"), ("Dutch", "nl"), ("Polish", "pl")]

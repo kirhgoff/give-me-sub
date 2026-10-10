@@ -3,8 +3,6 @@ Vendor/needle/libneedle.a
 Vendor/whistle.cact
 .DS_Store
 App/Info.plist
-Extension/Info.plist
-Extension/GiveMeSubExtension.entitlements
 .env
 App/GiveMeSub.entitlements
 build/
