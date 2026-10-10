@@ -1,41 +1,25 @@
 import AVFoundation
 import Observation
+import os
 
-@Observable final class Captioner {
-    var isRunning = false
-    var language: String? = nil
-    var lastText = ""
-    @ObservationIgnored private let whistle = Whistle()
-    @ObservationIgnored private let overlay = CaptionOverlay()
-    @ObservationIgnored private let tap = SystemAudioTap()
-    @ObservationIgnored private var converter: AVAudioConverter?
-    @ObservationIgnored private var pending = [Float]()
-    @ObservationIgnored private let target = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16000, channels: 1, interleaved: false)!
-    @ObservationIgnored private var loaded = false
+nonisolated private final class AudioIngest: @unchecked Sendable {
+    private static let sampleRate = 16000.0
+    private static let converterSlackFrames: AVAudioFrameCount = 32
+    private static let samplesPerChunk = 16000
 
-    func toggle() { isRunning ? stop() : start() }
+    private let target = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false)!
+    private let continuation: AsyncStream<[Float]>.Continuation
+    private var converter: AVAudioConverter?
+    private var carry = [Float]()
 
-    func start() {
-        do {
-            if !loaded { try whistle.load(modelURL: Bundle.main.url(forResource: "whistle", withExtension: "cact")!); loaded = true }
-            try tap.start { [weak self] buffer in self?.ingest(buffer) }
-            converter = AVAudioConverter(from: tap.format, to: target)
-            isRunning = true
-            overlay.flash("Captions on")
-        } catch { NSLog("start failed: %@", "\(error)") }
+    init(continuation: AsyncStream<[Float]>.Continuation) {
+        self.continuation = continuation
     }
 
-    func stop() {
-        tap.stop()
-        whistle.stop { [weak self] in self?.publish($0) }
-        pending.removeAll()
-        isRunning = false
-        overlay.flash("Captions off")
-    }
-
-    private func ingest(_ buffer: AVAudioPCMBuffer) {
+    func receive(_ buffer: AVAudioPCMBuffer) {
+        if converter == nil { converter = AVAudioConverter(from: buffer.format, to: target) }
         guard let converter else { return }
-        let capacity = AVAudioFrameCount(Double(buffer.frameLength) * 16000 / buffer.format.sampleRate) + 32
+        let capacity = AVAudioFrameCount(Double(buffer.frameLength) * Self.sampleRate / buffer.format.sampleRate) + Self.converterSlackFrames
         guard let out = AVAudioPCMBuffer(pcmFormat: target, frameCapacity: capacity) else { return }
         var consumed = false
         converter.convert(to: out, error: nil) { _, status in
@@ -47,19 +31,78 @@ import Observation
             status.pointee = .haveData
             return buffer
         }
-        pending.append(contentsOf: UnsafeBufferPointer(start: out.floatChannelData![0], count: Int(out.frameLength)))
-        while pending.count >= 16000 {
-            let chunk = Array(pending.prefix(16000))
-            pending.removeFirst(16000)
-            whistle.process(chunk, language: language) { [weak self] in self?.publish($0) }
+        carry.append(contentsOf: UnsafeBufferPointer(start: out.floatChannelData![0], count: Int(out.frameLength)))
+        while carry.count >= Self.samplesPerChunk {
+            continuation.yield(Array(carry.prefix(Self.samplesPerChunk)))
+            carry.removeFirst(Self.samplesPerChunk)
+        }
+    }
+}
+
+@Observable
+final class Captioner {
+    private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "captioner")
+
+    var isRunning = false
+    var language: String?
+    var lastText = ""
+    @ObservationIgnored private let whistle = Whistle()
+    @ObservationIgnored private let overlay = CaptionOverlay()
+    @ObservationIgnored private let tap = SystemAudioTap()
+    @ObservationIgnored private var session: Task<Void, Never>?
+    @ObservationIgnored private var chunkSink: AsyncStream<[Float]>.Continuation?
+    @ObservationIgnored private var loaded = false
+
+    func toggle() { isRunning ? stop() : start() }
+
+    func start() {
+        guard !isRunning else { return }
+        isRunning = true
+        session = Task { await run() }
+    }
+
+    func stop() {
+        session?.cancel()
+        tap.stop()
+        chunkSink?.finish()
+        chunkSink = nil
+        isRunning = false
+        overlay.flash("Captions off")
+    }
+
+    private func run() async {
+        do {
+            if !loaded {
+                let modelURL = Bundle.main.url(forResource: "whistle", withExtension: "cact")!
+                try await whistle.load(modelURL: modelURL)
+                loaded = true
+            }
+            guard !Task.isCancelled else { return }
+            let (chunks, sink) = AsyncStream.makeStream(of: [Float].self)
+            chunkSink = sink
+            try tap.start(onBuffer: AudioIngest(continuation: sink).receive)
+            overlay.flash("Captions on")
+            for await chunk in chunks {
+                do {
+                    publish(try await whistle.process(chunk, language: language))
+                } catch {
+                    Self.logger.error("transcription pass failed: \(error)")
+                }
+            }
+            let tail = try await whistle.finish()
+            guard !Task.isCancelled else { return }
+            publish(tail)
+        } catch {
+            guard !Task.isCancelled else { return }
+            Self.logger.error("captioning failed: \(error)")
+            tap.stop()
+            isRunning = false
         }
     }
 
     private func publish(_ segment: WhistleSegment) {
         guard !segment.text.isEmpty || !segment.pending.isEmpty else { return }
-        DispatchQueue.main.async {
-            self.lastText = segment.text
-            self.overlay.show(text: segment.text, pending: segment.pending)
-        }
+        lastText = segment.text
+        overlay.show(text: segment.text, pending: segment.pending)
     }
 }

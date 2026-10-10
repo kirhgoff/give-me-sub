@@ -1,38 +1,50 @@
-import Foundation
 import CNeedle
+import Foundation
 
-struct WhistleSegment: Decodable {
+nonisolated struct WhistleSegment: Decodable, Sendable {
     let text: String
     let pending: String
     let received: Double
 }
 
-final class Whistle {
-    private let queue = DispatchQueue(label: "givemesub.whistle")
-    private var out = [CChar](repeating: 0, count: 1 << 16)
+nonisolated struct WhistleError: Error, CustomStringConvertible {
+    let code: Int32
+    let reason: String
+
+    var description: String { "needle error \(code): \(reason)" }
+}
+
+actor Whistle {
+    private static let outputCapacity = 1 << 16
+
+    private let queue = DispatchSerialQueue(label: "givemesub.whistle")
+    private var out = [CChar](repeating: 0, count: Whistle.outputCapacity)
+
+    nonisolated var unownedExecutor: UnownedSerialExecutor {
+        queue.asUnownedSerialExecutor()
+    }
 
     func load(modelURL: URL) throws {
         let bytes = try Data(contentsOf: modelURL)
-        let rc = bytes.withUnsafeBytes { needle_load($0.bindMemory(to: UInt8.self).baseAddress, UInt64(bytes.count)) }
-        if rc < 0 { throw NSError(domain: "Whistle", code: Int(rc), userInfo: [NSLocalizedDescriptionKey: String(cString: needle_last_error())]) }
+        let status = bytes.withUnsafeBytes { needle_load($0.bindMemory(to: UInt8.self).baseAddress, UInt64(bytes.count)) }
+        try check(status)
     }
 
-    func process(_ pcm: [Float], language: String?, completion: @escaping (WhistleSegment) -> Void) {
-        queue.async {
-            let rc = pcm.withUnsafeBufferPointer { needle_stream_transcribe_process($0.baseAddress, Int32(pcm.count), language, nil, &self.out, Int32(self.out.count)) }
-            if let segment = self.decode(rc) { completion(segment) }
-        }
+    func process(_ pcm: [Float], language: String?) throws -> WhistleSegment {
+        let status = pcm.withUnsafeBufferPointer { needle_stream_transcribe_process($0.baseAddress, Int32(pcm.count), language, nil, &out, Int32(out.count)) }
+        return try decode(status)
     }
 
-    func stop(completion: @escaping (WhistleSegment) -> Void) {
-        queue.async {
-            let rc = needle_stream_transcribe_stop(&self.out, Int32(self.out.count))
-            if let segment = self.decode(rc) { completion(segment) }
-        }
+    func finish() throws -> WhistleSegment {
+        try decode(needle_stream_transcribe_stop(&out, Int32(out.count)))
     }
 
-    private func decode(_ rc: Int32) -> WhistleSegment? {
-        guard rc >= 0 else { NSLog("whistle: %@", String(cString: needle_last_error())); return nil }
-        return try? JSONDecoder().decode(WhistleSegment.self, from: Data(String(cString: out).utf8))
+    private func check(_ status: Int32) throws {
+        guard status >= 0 else { throw WhistleError(code: status, reason: String(cString: needle_last_error())) }
+    }
+
+    private func decode(_ status: Int32) throws -> WhistleSegment {
+        try check(status)
+        return try JSONDecoder().decode(WhistleSegment.self, from: Data(out.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }))
     }
 }

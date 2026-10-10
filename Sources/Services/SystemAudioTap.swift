@@ -8,7 +8,7 @@ final class SystemAudioTap {
     private let queue = DispatchQueue(label: "givemesub.tap")
     private(set) var format: AVAudioFormat!
 
-    func start(onBuffer: @escaping (AVAudioPCMBuffer) -> Void) throws {
+    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
         let description = CATapDescription(monoGlobalTapButExcludeProcesses: [])
         description.uuid = UUID()
         description.isPrivate = true
@@ -32,12 +32,16 @@ final class SystemAudioTap {
         ]
         try check(AudioHardwareCreateAggregateDevice(aggregate as CFDictionary, &aggregateID))
 
-        let format = self.format!
-        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, queue) { _, input, _, _, _ in
+        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, queue, makeIOBlock(format: format, onBuffer: onBuffer)))
+        try check(AudioDeviceStart(aggregateID, procID))
+    }
+
+    // A main-actor closure called on the tap queue traps at runtime, so the block is formed nonisolated.
+    nonisolated private func makeIOBlock(format: AVAudioFormat, onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) -> AudioDeviceIOBlock {
+        { _, input, _, _, _ in
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: input) else { return }
             onBuffer(buffer)
-        })
-        try check(AudioDeviceStart(aggregateID, procID))
+        }
     }
 
     func stop() {
