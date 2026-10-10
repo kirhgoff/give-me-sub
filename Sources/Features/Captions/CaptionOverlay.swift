@@ -20,7 +20,7 @@ private struct CaptionView: View {
 final class CaptionOverlay {
     private let panel = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private var committed = ""
-    private var hideTimer: Timer?
+    private var hideTask: Task<Void, Error>?
 
     init() {
         panel.isOpaque = false
@@ -51,10 +51,11 @@ final class CaptionOverlay {
             panel.setFrame(NSRect(origin: origin, size: size), display: true)
         }
         panel.orderFrontRegardless()
-        hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: false) { [weak self] _ in
-            self?.panel.orderOut(nil)
-            self?.committed = ""
+        hideTask?.cancel()
+        hideTask = Task {
+            try await Task.sleep(for: .seconds(seconds))
+            panel.orderOut(nil)
+            committed = ""
         }
     }
 }
