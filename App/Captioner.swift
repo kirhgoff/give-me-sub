@@ -1,5 +1,4 @@
 import AVFoundation
-import SafariServices
 import Observation
 
 @Observable final class Captioner {
@@ -61,11 +60,6 @@ import Observation
         DispatchQueue.main.async {
             self.lastText = segment.text
             self.overlay.show(text: segment.text, pending: segment.pending)
-        }
-        let payload: [String: Any] = ["text": segment.text, "pending": segment.pending, "received": segment.received]
-        DistributedNotificationCenter.default().postNotificationName(NativeHost.caption, object: nil, userInfo: payload, deliverImmediately: true)
-        SFSafariApplication.dispatchMessage(withName: "caption", toExtensionWithIdentifier: "com.kirill.givemesub.Extension", userInfo: payload) { error in
-            if let error { NSLog("dispatch failed: %@", "\(error)") }
         }
     }
 }

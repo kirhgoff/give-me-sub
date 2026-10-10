@@ -28,10 +28,8 @@ targets:
       - path: Vendor/NOTICE
         buildPhase: resources
     dependencies:
-      - target: GiveMeSubExtension
       - sdk: CoreAudio.framework
       - sdk: AVFoundation.framework
-      - sdk: SafariServices.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kirill.givemesub
@@ -54,31 +52,6 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.kirill.givemesub
             CFBundleURLSchemes: [givemesub]
-  GiveMeSubExtension:
-    type: app-extension
-    platform: macOS
-    sources:
-      - path: Extension/SafariWebExtensionHandler.swift
-      - path: Extension/Resources
-        buildPhase: resources
-    dependencies:
-      - sdk: SafariServices.framework
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kirill.givemesub.Extension
-        GENERATE_INFOPLIST_FILE: YES
-    info:
-      path: Extension/Info.plist
-      properties:
-        CFBundleShortVersionString: $(MARKETING_VERSION)
-        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        NSExtension:
-          NSExtensionPointIdentifier: com.apple.Safari.web-extension
-          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
-    entitlements:
-      path: Extension/GiveMeSubExtension.entitlements
-      properties:
-        com.apple.security.app-sandbox: true
   GiveMeSubTests:
     type: bundle.unit-test
     platform: macOS
