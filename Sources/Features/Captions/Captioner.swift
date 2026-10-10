@@ -1,108 +1,103 @@
-import AVFoundation
 import Observation
 import os
 
-nonisolated private final class AudioIngest: @unchecked Sendable {
-    private static let sampleRate = 16000.0
-    private static let converterSlackFrames: AVAudioFrameCount = 32
-    private static let samplesPerChunk = 16000
-
-    private let target = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false)!
-    private let continuation: AsyncStream<[Float]>.Continuation
-    private var converter: AVAudioConverter?
-    private var carry = [Float]()
-
-    init(continuation: AsyncStream<[Float]>.Continuation) {
-        self.continuation = continuation
-    }
-
-    func receive(_ buffer: AVAudioPCMBuffer) {
-        if converter == nil { converter = AVAudioConverter(from: buffer.format, to: target) }
-        guard let converter else { return }
-        let capacity = AVAudioFrameCount(Double(buffer.frameLength) * Self.sampleRate / buffer.format.sampleRate) + Self.converterSlackFrames
-        guard let out = AVAudioPCMBuffer(pcmFormat: target, frameCapacity: capacity) else { return }
-        var consumed = false
-        converter.convert(to: out, error: nil) { _, status in
-            if consumed {
-                status.pointee = .noDataNow
-                return nil
-            }
-            consumed = true
-            status.pointee = .haveData
-            return buffer
-        }
-        carry.append(contentsOf: UnsafeBufferPointer(start: out.floatChannelData![0], count: Int(out.frameLength)))
-        while carry.count >= Self.samplesPerChunk {
-            continuation.yield(Array(carry.prefix(Self.samplesPerChunk)))
-            carry.removeFirst(Self.samplesPerChunk)
-        }
-    }
-}
-
 @Observable
 final class Captioner {
+    static let captionsOn = "Captions on"
+    static let captionsOff = "Captions off"
+    static let captionsUnavailable = "Captions unavailable"
+
     private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "captioner")
 
-    var isRunning = false
-    var language: String?
-    var lastText = ""
-    @ObservationIgnored private let whistle = Whistle()
-    @ObservationIgnored private let overlay = CaptionOverlay()
-    @ObservationIgnored private let tap = SystemAudioTap()
-    @ObservationIgnored private var session: Task<Void, Never>?
-    @ObservationIgnored private var chunkSink: AsyncStream<[Float]>.Continuation?
-    @ObservationIgnored private var loaded = false
+    private(set) var isRunning = false
+    var language: Language?
+    private(set) var lastText = ""
+    let caption: CaptionState
 
-    func toggle() { isRunning ? stop() : start() }
+    private let source: any AudioSource
+    private let transcriber: any Transcriber
+    @ObservationIgnored private var sessionTask: Task<Void, Never>?
+    @ObservationIgnored private var flushTask: Task<Void, Never>?
 
-    func start() {
-        guard !isRunning else { return }
-        isRunning = true
-        session = Task { await run() }
+    init(source: any AudioSource = SystemAudioTap(), transcriber: any Transcriber = Whistle(), caption: CaptionState = CaptionState()) {
+        self.source = source
+        self.transcriber = transcriber
+        self.caption = caption
     }
 
-    func stop() {
-        session?.cancel()
-        tap.stop()
-        chunkSink?.finish()
-        chunkSink = nil
-        isRunning = false
-        overlay.flash("Captions off")
-    }
-
-    private func run() async {
-        do {
-            if !loaded {
-                let modelURL = Bundle.main.url(forResource: "whistle", withExtension: "cact")!
-                try await whistle.load(modelURL: modelURL)
-                loaded = true
-            }
-            guard !Task.isCancelled else { return }
-            let (chunks, sink) = AsyncStream.makeStream(of: [Float].self)
-            chunkSink = sink
-            try tap.start(onBuffer: AudioIngest(continuation: sink).receive)
-            overlay.flash("Captions on")
-            for await chunk in chunks {
-                do {
-                    publish(try await whistle.process(chunk, language: language))
-                } catch {
-                    Self.logger.error("transcription pass failed: \(error)")
-                }
-            }
-            let tail = try await whistle.finish()
-            guard !Task.isCancelled else { return }
-            publish(tail)
-        } catch {
-            guard !Task.isCancelled else { return }
-            Self.logger.error("captioning failed: \(error)")
-            tap.stop()
-            isRunning = false
+    func toggle() {
+        if isRunning {
+            stop()
+        } else {
+            start()
         }
     }
 
-    private func publish(_ segment: WhistleSegment) {
-        guard !segment.text.isEmpty || !segment.pending.isEmpty else { return }
-        lastText = segment.text
-        overlay.show(text: segment.text, pending: segment.pending)
+    @discardableResult
+    func start() -> Task<Void, Never> {
+        if isRunning, let sessionTask { return sessionTask }
+        isRunning = true
+        let previousFlush = flushTask
+        let task = Task { await run(after: previousFlush) }
+        sessionTask = task
+        return task
+    }
+
+    @discardableResult
+    func stop() -> Task<Void, Never> {
+        guard isRunning else { return flushTask ?? Task {} }
+        isRunning = false
+        source.stop()
+        sessionTask?.cancel()
+        caption.flash(Self.captionsOff)
+        let task = Task { await flush() }
+        flushTask = task
+        return task
+    }
+
+    private func run(after previousFlush: Task<Void, Never>?) async {
+        await previousFlush?.value
+        let blocks: AsyncStream<[Float]>
+        do {
+            try await transcriber.prepare()
+            guard !Task.isCancelled else { return }
+            blocks = try source.start()
+        } catch {
+            guard !Task.isCancelled else { return }
+            Self.logger.error("captioning failed to start: \(error)")
+            isRunning = false
+            caption.flash(Self.captionsUnavailable)
+            return
+        }
+        caption.flash(Self.captionsOn)
+        var chunker = SampleChunker()
+        for await block in blocks {
+            for chunk in chunker.append(block) {
+                await transcribe(chunk)
+            }
+        }
+        guard !Task.isCancelled else { return }
+        await stop().value
+    }
+
+    private func transcribe(_ chunk: [Float]) async {
+        guard !Task.isCancelled else { return }
+        do {
+            let segment = try await transcriber.process(chunk, language: language)
+            guard !Task.isCancelled, let segment else { return }
+            lastText = segment.text
+            caption.show(segment)
+        } catch {
+            Self.logger.error("transcription pass failed: \(error)")
+        }
+    }
+
+    private func flush() async {
+        do {
+            guard let tail = try await transcriber.finish() else { return }
+            lastText = tail.text
+        } catch {
+            Self.logger.error("transcription flush failed: \(error)")
+        }
     }
 }
