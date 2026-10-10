@@ -1,0 +1,79 @@
+excluded:
+  - DerivedData
+  - build
+  - .build
+  - "**/build"
+  - Vendor
+
+disabled_rules:
+  - line_length
+  - file_length
+  - type_body_length
+  - nesting
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+
+trailing_comma:
+  mandatory_comma: true
+
+identifier_name:
+  min_length:
+    error: 3
+  excluded:
+    - id
+    - x
+    - y
+    - ok
+
+custom_rules:
+  main_queue_dispatch:
+    regex: 'DispatchQueue\.main\.(async|asyncAfter)'
+    message: "Use a stored, cancellable Task (with Task.sleep for delays)"
+    severity: error
+  timer:
+    regex: '\bTimer\.(scheduledTimer|publish)|\bTimer\('
+    message: "Use a stored, cancellable Task with Task.sleep"
+    severity: error
+  detached_task:
+    regex: 'Task\.detached'
+    message: "Use a nonisolated function, an actor or @concurrent instead"
+    severity: error
+  assume_isolated:
+    regex: '\.assumeIsolated'
+    message: "Await onto the actor instead of asserting isolation"
+    severity: error
+  nonisolated_unsafe:
+    regex: 'nonisolated\(unsafe\)'
+    message: "Move the shared state into an actor or a Mutex"
+    severity: error
+  observable_own_line:
+    regex: '@Observable[ \t]+\S'
+    message: "Put @Observable on its own line"
+    severity: error
+  impl_suffix:
+    regex: '\b(class|struct|actor|enum)\s+\w+Impl\b'
+    message: "Prefix the production implementation with Default instead"
+    severity: error
+  sleep_in_tests:
+    included: '.*Tests/.*\.swift'
+    regex: '\b(Task\.sleep|sleep|usleep)\('
+    message: "Await the work or use confirmation {} instead of sleeping"
+    severity: error
+  xctest:
+    regex: '\bimport XCTest\b'
+    message: "Use Swift Testing"
+    severity: error
+  nslog:
+    regex: '\bNSLog\('
+    message: "Log through os.Logger with the reason"
+    severity: error
+  foreground_color:
+    regex: '\.foregroundColor\('
+    message: "Use foregroundStyle"
+    severity: error
+
+baseline: .swiftlint-baseline.json
