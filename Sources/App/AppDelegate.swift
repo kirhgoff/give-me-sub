@@ -1,15 +1,26 @@
 import AppKit
+import os
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let captioner = Captioner()
+    private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "links")
+
+    let captioner: Captioner
+    private let overlay: CaptionOverlay
+
+    override init() {
+        let captioner = Captioner()
+        self.captioner = captioner
+        overlay = CaptionOverlay(state: captioner.caption)
+        super.init()
+    }
 
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
             switch url.host() {
             case "toggle": captioner.toggle()
-            case "start": if !captioner.isRunning { captioner.start() }
-            case "stop": if captioner.isRunning { captioner.stop() }
-            default: NSLog("unknown link: %@", url.absoluteString)
+            case "start": captioner.start()
+            case "stop": captioner.stop()
+            default: Self.logger.error("unknown link: \(url.absoluteString)")
             }
         }
     }

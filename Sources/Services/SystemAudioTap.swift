@@ -1,14 +1,40 @@
 import AVFoundation
 import CoreAudio
 
-final class SystemAudioTap {
+nonisolated enum AudioTapError: Error {
+    case unsupportedFormat
+}
+
+final class SystemAudioTap: AudioSource {
     private var tapID = AudioObjectID(kAudioObjectUnknown)
     private var aggregateID = AudioObjectID(kAudioObjectUnknown)
     private var procID: AudioDeviceIOProcID?
+    private var continuation: AsyncStream<[Float]>.Continuation?
     private let queue = DispatchQueue(label: "givemesub.tap")
-    private(set) var format: AVAudioFormat!
 
-    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+    func start() throws -> AsyncStream<[Float]> {
+        stop()
+        let (stream, continuation) = AsyncStream.makeStream(of: [Float].self)
+        self.continuation = continuation
+        do {
+            try open(yielding: continuation)
+        } catch {
+            stop()
+            throw error
+        }
+        return stream
+    }
+
+    func stop() {
+        if let procID { AudioDeviceStop(aggregateID, procID); AudioDeviceDestroyIOProcID(aggregateID, procID) }
+        if aggregateID != kAudioObjectUnknown { AudioHardwareDestroyAggregateDevice(aggregateID) }
+        if tapID != kAudioObjectUnknown { AudioHardwareDestroyProcessTap(tapID) }
+        procID = nil; aggregateID = kAudioObjectUnknown; tapID = kAudioObjectUnknown
+        continuation?.finish()
+        continuation = nil
+    }
+
+    private func open(yielding continuation: AsyncStream<[Float]>.Continuation) throws {
         let description = CATapDescription(monoGlobalTapButExcludeProcesses: [])
         description.uuid = UUID()
         description.isPrivate = true
@@ -17,7 +43,7 @@ final class SystemAudioTap {
 
         var asbd = AudioStreamBasicDescription()
         try read(tapID, kAudioTapPropertyFormat, &asbd)
-        format = AVAudioFormat(streamDescription: &asbd)
+        guard let format = AVAudioFormat(streamDescription: &asbd), let resampler = Resampler(from: format) else { throw AudioTapError.unsupportedFormat }
 
         let outputUID = try defaultOutputUID()
         let aggregate: [String: Any] = [
@@ -32,23 +58,18 @@ final class SystemAudioTap {
         ]
         try check(AudioHardwareCreateAggregateDevice(aggregate as CFDictionary, &aggregateID))
 
-        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, queue, makeIOBlock(format: format, onBuffer: onBuffer)))
+        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, queue, makeIOBlock(format: format, resampler: resampler, continuation: continuation)))
         try check(AudioDeviceStart(aggregateID, procID))
     }
 
     // A main-actor closure called on the tap queue traps at runtime, so the block is formed nonisolated.
-    nonisolated private func makeIOBlock(format: AVAudioFormat, onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) -> AudioDeviceIOBlock {
+    nonisolated private func makeIOBlock(format: AVAudioFormat, resampler: Resampler, continuation: AsyncStream<[Float]>.Continuation) -> AudioDeviceIOBlock {
         { _, input, _, _, _ in
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: input) else { return }
-            onBuffer(buffer)
+            let samples = resampler.convert(buffer)
+            guard !samples.isEmpty else { return }
+            continuation.yield(samples)
         }
-    }
-
-    func stop() {
-        if let procID { AudioDeviceStop(aggregateID, procID); AudioDeviceDestroyIOProcID(aggregateID, procID) }
-        if aggregateID != kAudioObjectUnknown { AudioHardwareDestroyAggregateDevice(aggregateID) }
-        if tapID != kAudioObjectUnknown { AudioHardwareDestroyProcessTap(tapID) }
-        procID = nil; aggregateID = kAudioObjectUnknown; tapID = kAudioObjectUnknown
     }
 
     private func address(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {
@@ -62,7 +83,7 @@ final class SystemAudioTap {
     private func read<T>(_ id: AudioObjectID, _ selector: AudioObjectPropertySelector, _ value: inout T) throws {
         var addr = address(selector)
         var size = UInt32(MemoryLayout<T>.size)
-        try check(AudioObjectGetPropertyData(id, &addr, 0, nil, &size, &value))
+        try withUnsafeMutablePointer(to: &value) { try check(AudioObjectGetPropertyData(id, &addr, 0, nil, &size, $0)) }
     }
 
     private func defaultOutputUID() throws -> String {
