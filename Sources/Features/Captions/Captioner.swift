@@ -83,10 +83,17 @@ final class Captioner {
             try tap.start(onBuffer: AudioIngest(continuation: sink).receive)
             overlay.flash("Captions on")
             for await chunk in chunks {
-                publish(try await whistle.process(chunk, language: language))
+                do {
+                    publish(try await whistle.process(chunk, language: language))
+                } catch {
+                    Self.logger.error("transcription pass failed: \(error)")
+                }
             }
-            publish(try await whistle.finish())
+            let tail = try await whistle.finish()
+            guard !Task.isCancelled else { return }
+            publish(tail)
         } catch {
+            guard !Task.isCancelled else { return }
             Self.logger.error("captioning failed: \(error)")
             tap.stop()
             isRunning = false
