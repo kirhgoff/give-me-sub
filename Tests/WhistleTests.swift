@@ -3,9 +3,6 @@ import Testing
 @testable import GiveMeSub
 
 struct WhistleTests {
-    private static let sampleRate = 16000.0
-    private static let chunkSize = 16000
-
     @Test
     func `streams a spoken sentence`() async throws {
         let wav = FileManager.default.temporaryDirectory.appendingPathComponent("givemesub-check.wav")
@@ -18,17 +15,18 @@ struct WhistleTests {
         let file = try AVAudioFile(forReading: wav)
         let buffer = try #require(AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)))
         try file.read(into: buffer)
-        #expect(file.processingFormat.sampleRate == Self.sampleRate)
+        #expect(file.processingFormat.sampleRate == SpeechFormat.sampleRate)
         let samples = Array(UnsafeBufferPointer(start: try #require(buffer.floatChannelData)[0], count: Int(buffer.frameLength)))
 
-        let whistle = Whistle()
-        try await whistle.load(modelURL: try #require(Bundle.main.url(forResource: "whistle", withExtension: "cact")))
+        let whistle: any Transcriber = Whistle()
+        try await whistle.prepare()
         var transcript = ""
-        for start in stride(from: 0, to: samples.count, by: Self.chunkSize) {
-            let chunk = Array(samples[start..<min(start + Self.chunkSize, samples.count)])
-            transcript += try await whistle.process(chunk, language: "en").text + " "
+        for start in stride(from: 0, to: samples.count, by: SpeechFormat.samplesPerChunk) {
+            let chunk = Array(samples[start..<min(start + SpeechFormat.samplesPerChunk, samples.count)])
+            transcript += try await whistle.process(chunk, language: .english)?.text ?? ""
+            transcript += " "
         }
-        transcript += try await whistle.finish().text
+        transcript += try await whistle.finish()?.text ?? ""
         #expect(transcript.lowercased().contains("kitchen"), Comment(rawValue: transcript))
     }
 }
