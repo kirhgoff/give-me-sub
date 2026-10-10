@@ -6,12 +6,15 @@ options:
   xcodeVersion: "27.0"
 settings:
   base:
-    SWIFT_VERSION: "5.0"
+    SWIFT_VERSION: "6.0"
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    ENABLE_PREVIEWS: YES
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
     DEVELOPMENT_TEAM: ""
     MACOSX_DEPLOYMENT_TARGET: "26.0"
-    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
     ARCHS: arm64
     ENABLE_HARDENED_RUNTIME: YES
     MARKETING_VERSION: "0.0.0"
@@ -56,16 +59,14 @@ targets:
     platform: macOS
     sources:
       - Tests
-      - Sources/Services/Whistle.swift
-      - path: Vendor/whistle.cact
-        buildPhase: resources
     dependencies:
+      - target: GiveMeSub
       - sdk: AVFoundation.framework
     settings:
       base:
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/GiveMeSub.app/Contents/MacOS/GiveMeSub
+        BUNDLE_LOADER: $(TEST_HOST)
         SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
-        LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
-        OTHER_LDFLAGS: -lneedle -lc++
         ENABLE_APP_SANDBOX: NO
         GENERATE_INFOPLIST_FILE: YES
 schemes:
