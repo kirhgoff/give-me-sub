@@ -2,9 +2,9 @@ GiveMeSub.xcodeproj/
 Vendor/needle/libneedle.a
 Vendor/whistle.cact
 .DS_Store
-App/Info.plist
+Sources/App/Info.plist
 .env
-App/GiveMeSub.entitlements
+Sources/App/GiveMeSub.entitlements
 build/
 DerivedData/
 .build/
