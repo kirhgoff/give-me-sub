@@ -47,6 +47,8 @@ xcodebuild archive -project GiveMeSub.xcodeproj -scheme GiveMeSub -archivePath b
 
 Product > Test (`GiveMeSubTests`); it synthesizes speech with `say` and checks the transcript.
 
+Xcode Cloud runs the same build and tests on pull requests and `main`. `ci_scripts/ci_post_clone.sh` installs XcodeGen, fetches the vendor files and generates the project first.
+
 ## Known limits
 
 - Local (ad-hoc) builds re-prompt System Audio Recording after each rebuild; brew releases are Developer ID signed and keep the grant.
