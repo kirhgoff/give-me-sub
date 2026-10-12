@@ -47,7 +47,7 @@ final class Preferences {
             appearance.fontFamily = appearance.fontFamily.flatMap(installedFamily)
             return appearance
         } catch {
-            logger.error("unreadable caption appearance: \(error)")
+            logger.error("unreadable caption appearance: \(error, privacy: .public)")
             return CaptionAppearance()
         }
     }
@@ -60,7 +60,7 @@ final class Preferences {
         do {
             store.set(try JSONEncoder().encode(appearance), forKey: Self.appearanceKey)
         } catch {
-            Self.logger.error("caption appearance not saved: \(error)")
+            Self.logger.error("caption appearance not saved: \(error, privacy: .public)")
         }
     }
 }

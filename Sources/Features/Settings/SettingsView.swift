@@ -106,7 +106,7 @@ struct SettingsView: View {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            Self.logger.error("launch at login \(enabled ? "register" : "unregister") failed: \(error)")
+            Self.logger.error("launch at login \(enabled ? "register" : "unregister", privacy: .public) failed: \(error, privacy: .public)")
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }

@@ -64,7 +64,7 @@ final class Captioner {
             blocks = try source.start()
         } catch {
             guard !Task.isCancelled else { return }
-            Self.logger.error("captioning failed to start: \(error)")
+            Self.logger.error("captioning failed to start: \(error, privacy: .public)")
             isRunning = false
             caption.flash(Self.captionsUnavailable)
             return
@@ -90,7 +90,7 @@ final class Captioner {
             case .subtitles: caption.showSubtitle(segment.text)
             }
         } catch {
-            Self.logger.error("transcription pass failed: \(error)")
+            Self.logger.error("transcription pass failed: \(error, privacy: .public)")
         }
     }
 
@@ -98,7 +98,7 @@ final class Captioner {
         do {
             _ = try await transcriber.finish()
         } catch {
-            Self.logger.error("transcription flush failed: \(error)")
+            Self.logger.error("transcription flush failed: \(error, privacy: .public)")
         }
     }
 }
