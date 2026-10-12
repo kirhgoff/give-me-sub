@@ -35,7 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
             guard let command = url.host().flatMap(LinkCommand.init(rawValue:)) else {
-                Self.logger.error("unknown link: \(url.absoluteString)")
+                Self.logger.error("unknown link: \(url.absoluteString, privacy: .public)")
                 continue
             }
             run(command)
