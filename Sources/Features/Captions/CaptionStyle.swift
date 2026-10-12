@@ -8,5 +8,5 @@ struct CaptionStyle {
     var backgroundOpacity = 0.7
     var pendingOpacity = 0.6
     var maxWidthRatio: CGFloat = 0.7
-    var fallbackScreenWidth: CGFloat = 1200
+    var areaHeightRatio: CGFloat = 0.3
 }
