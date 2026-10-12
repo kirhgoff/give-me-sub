@@ -2,7 +2,7 @@ import AppKit
 import os
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "links")
+    private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "links")
 
     let captioner: Captioner
     private let overlay: CaptionOverlay

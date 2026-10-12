@@ -1,6 +1,6 @@
 name: GiveMeSub
 options:
-  bundleIdPrefix: com.kirill
+  bundleIdPrefix: com.kirhgoff
   deploymentTarget:
     macOS: "26.0"
   xcodeVersion: "27.0"
@@ -34,7 +34,7 @@ targets:
       - sdk: AVFoundation.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kirill.givemesub
+        PRODUCT_BUNDLE_IDENTIFIER: com.kirhgoff.givemesub
         SWIFT_INCLUDE_PATHS: $(SRCROOT)/Vendor/needle
         LIBRARY_SEARCH_PATHS: $(SRCROOT)/Vendor/needle
         OTHER_LDFLAGS: -lneedle -lc++
@@ -52,7 +52,7 @@ targets:
         LSUIElement: true
         NSAudioCaptureUsageDescription: Captures system audio to generate live captions.
         CFBundleURLTypes:
-          - CFBundleURLName: com.kirill.givemesub
+          - CFBundleURLName: com.kirhgoff.givemesub
             CFBundleURLSchemes: [givemesub]
   GiveMeSubTests:
     type: bundle.unit-test
