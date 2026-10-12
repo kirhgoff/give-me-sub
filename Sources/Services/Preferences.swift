@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import Observation
 import os
 
@@ -36,11 +36,17 @@ final class Preferences {
     private static func loadAppearance(from store: any PreferenceStore) -> CaptionAppearance {
         guard let data = store.data(forKey: appearanceKey) else { return CaptionAppearance() }
         do {
-            return try JSONDecoder().decode(CaptionAppearance.self, from: data)
+            var appearance = try JSONDecoder().decode(CaptionAppearance.self, from: data)
+            appearance.fontFamily = appearance.fontFamily.flatMap(installedFamily)
+            return appearance
         } catch {
             logger.error("unreadable caption appearance: \(error)")
             return CaptionAppearance()
         }
+    }
+
+    private static func installedFamily(_ family: String) -> String? {
+        NSFontManager.shared.availableFontFamilies.contains(family) ? family : nil
     }
 
     private func save(_ appearance: CaptionAppearance) {

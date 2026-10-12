@@ -12,6 +12,7 @@ struct CaptionView: View {
             .font(font)
             .fontWeight(appearance.isBold ? .bold : .regular)
             .multilineTextAlignment(.center)
+            .truncationMode(.head)
             .padding(.horizontal, style.horizontalPadding)
             .padding(.vertical, style.verticalPadding)
             .background(.black.opacity(appearance.backgroundOpacity), in: RoundedRectangle(cornerRadius: style.cornerRadius))

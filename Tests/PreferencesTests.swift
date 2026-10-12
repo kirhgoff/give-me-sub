@@ -43,6 +43,13 @@ struct PreferencesTests {
     }
 
     @Test
+    func `an uninstalled font family falls back to the system font`() {
+        Preferences(store: store).appearance.fontFamily = "No Such Font Family"
+
+        #expect(Preferences(store: store).appearance.fontFamily == nil)
+    }
+
+    @Test
     func `unreadable appearance data falls back to the defaults`() {
         store.set(Data("x".utf8), forKey: Preferences.appearanceKey)
 
