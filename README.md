@@ -24,6 +24,8 @@ Play anything with audio, click the menu bar icon > Start captions. Pick a langu
 
 ## Hotkey
 
+⌃⌥⌘C toggles captions from anywhere (registered at launch, no permission needed). If another app already owns it, the app logs `hotkey ⌃⌥⌘C unavailable` and the links below still work.
+
 The app answers `givemesub://toggle`, `givemesub://start` and `givemesub://stop`; a link launches the app if needed and the overlay flashes "Captions on/off".
 
 Raycast: Create Quicklink > Name "Toggle captions", Link `givemesub://toggle`, Open With "GiveMeSub" > ⌘↵. Then select it in Raycast search > ⌘K > Configure Command > Set Hotkey. (Or Import Quicklinks with `[{"name":"Toggle captions","link":"givemesub://toggle","openWith":"GiveMeSub"}]`.)
