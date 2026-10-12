@@ -11,18 +11,13 @@ struct CaptionView: View {
             .padding(.horizontal, style.horizontalPadding)
             .padding(.vertical, style.verticalPadding)
             .background(.black.opacity(style.backgroundOpacity), in: RoundedRectangle(cornerRadius: style.cornerRadius))
-            .frame(maxWidth: maxWidth)
-            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 
     private var text: Text {
         let committed = Text(state.committed).foregroundStyle(.white)
         let pending = Text(state.pending).foregroundStyle(.white.opacity(style.pendingOpacity))
         return Text("\(committed) \(pending)")
-    }
-
-    private var maxWidth: CGFloat {
-        (NSScreen.main?.frame.width ?? style.fallbackScreenWidth) * style.maxWidthRatio
     }
 }
 

@@ -41,10 +41,6 @@ final class SystemAudioTap: AudioSource {
         description.muteBehavior = .unmuted
         try check(AudioHardwareCreateProcessTap(description, &tapID))
 
-        var asbd = AudioStreamBasicDescription()
-        try read(tapID, kAudioTapPropertyFormat, &asbd)
-        guard let format = AVAudioFormat(streamDescription: &asbd), let resampler = Resampler(from: format) else { throw AudioTapError.unsupportedFormat }
-
         let outputUID = try defaultOutputUID()
         let aggregate: [String: Any] = [
             kAudioAggregateDeviceNameKey: "GiveMeSub Tap",
@@ -57,6 +53,12 @@ final class SystemAudioTap: AudioSource {
             kAudioAggregateDeviceTapListKey: [[kAudioSubTapDriftCompensationKey: true, kAudioSubTapUIDKey: description.uuid.uuidString]],
         ]
         try check(AudioHardwareCreateAggregateDevice(aggregate as CFDictionary, &aggregateID))
+
+        var asbd = AudioStreamBasicDescription()
+        try read(tapID, kAudioTapPropertyFormat, &asbd)
+        // The tap reports 48 kHz, but the aggregate delivers it at the output device's rate (44.1 kHz on Bluetooth).
+        try read(aggregateID, kAudioDevicePropertyNominalSampleRate, &asbd.mSampleRate)
+        guard let format = AVAudioFormat(streamDescription: &asbd), let resampler = Resampler(from: format) else { throw AudioTapError.unsupportedFormat }
 
         try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, queue, makeIOBlock(format: format, resampler: resampler, continuation: continuation)))
         try check(AudioDeviceStart(aggregateID, procID))

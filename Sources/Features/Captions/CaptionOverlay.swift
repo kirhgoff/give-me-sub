@@ -7,10 +7,14 @@ final class CaptionOverlay {
 
     private let panel = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let host: NSHostingView<CaptionView>
+    private let style: CaptionStyle
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
     init(state: CaptionState, style: CaptionStyle = CaptionStyle()) {
+        self.style = style
         host = NSHostingView(rootView: CaptionView(state: state, style: style))
+        // Otherwise the hosting view resizes the panel to the text's narrowest layout, thousands of points tall.
+        host.sizingOptions = []
         panel.contentView = host
         panel.isOpaque = false
         panel.backgroundColor = .clear
@@ -39,8 +43,7 @@ final class CaptionOverlay {
 
     private func reposition() {
         guard let screen = NSScreen.main else { return }
-        host.layoutSubtreeIfNeeded()
-        let size = host.fittingSize
+        let size = NSSize(width: screen.frame.width * style.maxWidthRatio, height: screen.visibleFrame.height * style.areaHeightRatio)
         let origin = NSPoint(x: screen.frame.midX - size.width / 2, y: screen.visibleFrame.minY + screen.frame.height * Self.bottomOffsetRatio)
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
     }
