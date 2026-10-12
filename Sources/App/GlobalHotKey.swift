@@ -34,7 +34,7 @@ final class GlobalHotKey {
         let hotKeyID = EventHotKeyID(signature: Self.signature, id: Self.identifier)
         let registerStatus = RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKey)
         guard registerStatus == noErr else {
-            Self.logger.error("hotkey \(Self.toggleDisplay) unavailable: \(registerStatus)")
+            Self.logger.error("hotkey \(Self.toggleDisplay, privacy: .public) unavailable: \(registerStatus)")
             return
         }
     }
