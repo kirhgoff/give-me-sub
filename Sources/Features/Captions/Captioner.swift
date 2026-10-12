@@ -11,7 +11,6 @@ final class Captioner {
 
     private(set) var isRunning = false
     var language: Language?
-    private(set) var lastText = ""
     let caption: CaptionState
 
     private let source: any AudioSource
@@ -85,7 +84,6 @@ final class Captioner {
         do {
             let segment = try await transcriber.process(chunk, language: language)
             guard !Task.isCancelled, let segment else { return }
-            lastText = segment.text
             caption.show(segment)
         } catch {
             Self.logger.error("transcription pass failed: \(error)")
@@ -94,8 +92,7 @@ final class Captioner {
 
     private func flush() async {
         do {
-            guard let tail = try await transcriber.finish() else { return }
-            lastText = tail.text
+            _ = try await transcriber.finish()
         } catch {
             Self.logger.error("transcription flush failed: \(error)")
         }

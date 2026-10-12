@@ -77,7 +77,7 @@ struct CaptionerTests {
     }
 
     @Test
-    func `stop leaves the captions-off flash and routes the flush to lastText only`() async {
+    func `stop leaves the captions-off flash over the flushed tail`() async {
         await transcriber.script([], tail: TranscriptSegment(text: "last words", pending: ""))
         let session = captioner.start()
         await waitForCommitted { $0 == Captioner.captionsOn }
@@ -87,7 +87,6 @@ struct CaptionerTests {
 
         #expect(caption.committed == Captioner.captionsOff)
         #expect(caption.pending.isEmpty)
-        #expect(captioner.lastText == "last words")
         #expect(!captioner.isRunning)
     }
 
@@ -131,7 +130,7 @@ struct CaptionerTests {
     }
 
     @Test
-    func `committed and pending text reach the caption and lastText`() async {
+    func `committed and pending text reach the caption`() async {
         await transcriber.script([
             .success(TranscriptSegment(text: "turn off", pending: "the")),
             .success(TranscriptSegment(text: "the lights", pending: "")),
@@ -142,20 +141,25 @@ struct CaptionerTests {
         await waitForCommitted { $0.hasSuffix("turn off the lights") }
 
         #expect(caption.pending.isEmpty)
-        #expect(captioner.lastText == "the lights")
         captioner.stop()
         await session.value
     }
 
     @Test
     func `empty passes change nothing`() async {
-        await transcriber.script([.success(TranscriptSegment(text: "hello", pending: "")), .success(nil)])
-        source.emit(blockSizes: [SpeechFormat.samplesPerChunk, SpeechFormat.samplesPerChunk])
-        source.end()
+        await transcriber.script([
+            .success(TranscriptSegment(text: "hello", pending: "")),
+            .success(nil),
+            .success(TranscriptSegment(text: "world", pending: "")),
+        ])
+        source.emit(blockSizes: Array(repeating: SpeechFormat.samplesPerChunk, count: 3))
+        let session = captioner.start()
 
-        await captioner.start().value
+        await waitForCommitted { $0.hasSuffix("world") }
 
-        #expect(captioner.lastText == "hello")
+        #expect(caption.committed.hasSuffix("hello world"))
+        captioner.stop()
+        await session.value
     }
 
     @Test
@@ -176,11 +180,13 @@ struct CaptionerTests {
     func `a failing pass is skipped and the session continues`() async {
         await transcriber.script([.failure(FakeFailure()), .success(TranscriptSegment(text: "second", pending: ""))])
         source.emit(blockSizes: [SpeechFormat.samplesPerChunk, SpeechFormat.samplesPerChunk])
-        source.end()
+        let session = captioner.start()
 
-        await captioner.start().value
+        await waitForCommitted { $0.hasSuffix("second") }
 
-        #expect(captioner.lastText == "second")
+        #expect(captioner.isRunning)
+        captioner.stop()
+        await session.value
     }
 
     @Test
