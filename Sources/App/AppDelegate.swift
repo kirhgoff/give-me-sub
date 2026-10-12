@@ -6,12 +6,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     let captioner: Captioner
     private let overlay: CaptionOverlay
+    private let hotKey = GlobalHotKey()
+    private var hotKeyTask: Task<Void, Never>?
 
     override init() {
         let captioner = Captioner()
         self.captioner = captioner
         overlay = CaptionOverlay(state: captioner.caption)
         super.init()
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        hotKey.register()
+        let presses = hotKey.presses
+        hotKeyTask = Task { [weak self] in
+            for await _ in presses {
+                guard let self else { return }
+                captioner.toggle()
+            }
+        }
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {

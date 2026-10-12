@@ -32,6 +32,7 @@ targets:
     dependencies:
       - sdk: CoreAudio.framework
       - sdk: AVFoundation.framework
+      - sdk: Carbon.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kirhgoff.givemesub
