@@ -85,7 +85,10 @@ final class Captioner {
         do {
             let segment = try await transcriber.process(chunk, language: preferences.language)
             guard !Task.isCancelled, let segment else { return }
-            caption.show(segment)
+            switch preferences.captionMode {
+            case .rolling: caption.show(segment)
+            case .subtitles: caption.showSubtitle(segment.text)
+            }
         } catch {
             Self.logger.error("transcription pass failed: \(error)")
         }

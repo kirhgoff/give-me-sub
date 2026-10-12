@@ -164,6 +164,20 @@ struct CaptionerTests {
     }
 
     @Test
+    func `subtitles mode shows whole sentences without pending`() async {
+        preferences.captionMode = .subtitles
+        await transcriber.script([.success(TranscriptSegment(text: "Hello there.", pending: "how are"))])
+        source.emit(blockSizes: [SpeechFormat.samplesPerChunk])
+        let session = captioner.start()
+
+        await waitForCommitted { $0 == "Hello there." }
+
+        #expect(caption.pending.isEmpty)
+        captioner.stop()
+        await session.value
+    }
+
+    @Test
     func `empty passes change nothing`() async {
         await transcriber.script([
             .success(TranscriptSegment(text: "hello", pending: "")),

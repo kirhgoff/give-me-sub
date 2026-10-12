@@ -55,4 +55,13 @@ struct PreferencesTests {
 
         #expect(Preferences(store: store).appearance == CaptionAppearance())
     }
+
+    @Test
+    func `caption mode defaults to rolling and is restored`() {
+        #expect(Preferences(store: store).captionMode == .rolling)
+
+        Preferences(store: store).captionMode = .subtitles
+
+        #expect(Preferences(store: store).captionMode == .subtitles)
+    }
 }

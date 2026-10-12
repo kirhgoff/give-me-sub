@@ -7,6 +7,7 @@ struct SettingsView: View {
     static let width: CGFloat = 420
     static let launchAtLoginTitle = "Launch at login"
     static let systemFont = "System"
+    static let modeTitle = "Mode"
     static let fontTitle = "Font"
     static let fontSizeTitle = "Size"
     static let boldTitle = "Bold"
@@ -40,6 +41,7 @@ struct SettingsView: View {
 
     private var appearanceSection: some View {
         Section(Self.appearanceSection) {
+            modePicker
             fontPicker
             fontSizeSlider
             boldToggle
@@ -50,6 +52,14 @@ struct SettingsView: View {
 
     private var launchAtLoginToggle: some View {
         Toggle(Self.launchAtLoginTitle, isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
+    }
+
+    private var modePicker: some View {
+        Picker(Self.modeTitle, selection: $preferences.captionMode) {
+            ForEach(CaptionMode.allCases) { mode in
+                Text(mode.displayName).tag(mode)
+            }
+        }
     }
 
     private var fontPicker: some View {

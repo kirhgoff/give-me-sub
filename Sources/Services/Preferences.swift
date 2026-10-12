@@ -6,8 +6,10 @@ import os
 final class Preferences {
     static let languageKey = "language"
     static let appearanceKey = "captionAppearance"
+    static let captionModeKey = "captionMode"
     static let autoLanguage = "auto"
     static let defaultLanguage = Language.english
+    static let defaultCaptionMode = CaptionMode.rolling
 
     private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "preferences")
 
@@ -19,12 +21,17 @@ final class Preferences {
         didSet { save(appearance) }
     }
 
+    var captionMode: CaptionMode {
+        didSet { store.set(captionMode.rawValue, forKey: Self.captionModeKey) }
+    }
+
     private let store: any PreferenceStore
 
     init(store: any PreferenceStore = UserDefaults.standard) {
         self.store = store
         language = Self.loadLanguage(from: store)
         appearance = Self.loadAppearance(from: store)
+        captionMode = store.string(forKey: Self.captionModeKey).flatMap(CaptionMode.init(rawValue:)) ?? Self.defaultCaptionMode
     }
 
     private static func loadLanguage(from store: any PreferenceStore) -> Language? {
