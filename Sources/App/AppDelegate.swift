@@ -1,3 +1,4 @@
+import AppIntents
 import AppKit
 import os
 
@@ -12,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         let captioner = Captioner()
         self.captioner = captioner
+        AppDependencyManager.shared.add(dependency: captioner)
         overlay = CaptionOverlay(state: captioner.caption)
         super.init()
     }
