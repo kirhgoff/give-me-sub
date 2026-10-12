@@ -10,9 +10,9 @@ final class CaptionOverlay {
     private let style: CaptionStyle
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
-    init(state: CaptionState, style: CaptionStyle = CaptionStyle()) {
+    init(state: CaptionState, preferences: Preferences, style: CaptionStyle = CaptionStyle()) {
         self.style = style
-        host = NSHostingView(rootView: CaptionView(state: state, style: style))
+        host = NSHostingView(rootView: CaptionView(state: state, preferences: preferences, style: style))
         // Otherwise the hosting view resizes the panel to the text's narrowest layout, thousands of points tall.
         host.sizingOptions = []
         panel.contentView = host

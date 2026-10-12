@@ -6,15 +6,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "links")
 
     let captioner: Captioner
+    let preferences: Preferences
     private let overlay: CaptionOverlay
     private let hotKey = GlobalHotKey()
     private var hotKeyTask: Task<Void, Never>?
 
     override init() {
-        let captioner = Captioner()
+        let preferences = Preferences()
+        let captioner = Captioner(preferences: preferences)
+        self.preferences = preferences
         self.captioner = captioner
         AppDependencyManager.shared.add(dependency: captioner)
-        overlay = CaptionOverlay(state: captioner.caption)
+        overlay = CaptionOverlay(state: captioner.caption, preferences: preferences)
         super.init()
     }
 
