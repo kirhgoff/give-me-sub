@@ -15,7 +15,6 @@ import os
             toggleButton
             languagePicker
             launchAtLoginToggle
-            lastCaptionLabel
             Divider()
             quitButton
         }
@@ -40,10 +39,6 @@ import os
 
     private var launchAtLoginToggle: some View {
         Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
-    }
-
-    private var lastCaptionLabel: some View {
-        Text(captioner.lastText.isEmpty ? "—" : captioner.lastText).font(.caption).lineLimit(2)
     }
 
     private var quitButton: some View {
