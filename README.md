@@ -20,7 +20,7 @@ Apple silicon, macOS 26+. Releases are Developer ID signed and notarized. Upgrad
 
 ## Use
 
-Play anything with audio, click the menu bar icon > Start captions. Pick a language if autodetect misfires.
+Play anything with audio, click the menu bar icon > Start captions. Pick a language in the menu or in Settings… (English by default; Auto detects). Settings… also sets the caption font, size, bold, colour and background, applied live.
 
 ## Hotkey
 
@@ -29,10 +29,10 @@ Play anything with audio, click the menu bar icon > Start captions. Pick a langu
 The app answers `givemesub://toggle`, `givemesub://start` and `givemesub://stop`; a link launches the app if needed and the overlay flashes "Captions on/off".
 
 Raycast: Create Quicklink > Name "Toggle captions", Link `givemesub://toggle`, Open With "GiveMeSub" > ⌘↵. Then select it in Raycast search > ⌘K > Configure Command > Set Hotkey. (Or Import Quicklinks with `[{"name":"Toggle captions","link":"givemesub://toggle","openWith":"GiveMeSub"}]`.)
-Shortcuts: a shortcut with "Open URLs" -> `givemesub://toggle` and a keyboard shortcut in its details.
+Shortcuts and Spotlight list Toggle, Start and Stop Captions as soon as the app is installed. For your own hotkey, add one of them to a new shortcut and set Add Keyboard Shortcut in its details.
 Terminal: `open givemesub://toggle`.
 
-Menu bar > "Launch at login" registers the app via SMAppService (System Settings > General > Login Items).
+Settings… > "Launch at login" registers the app via SMAppService (System Settings > General > Login Items).
 
 ## Release
 

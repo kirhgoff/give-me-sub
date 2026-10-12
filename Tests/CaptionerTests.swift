@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 import Testing
 @testable import GiveMeSub
@@ -5,6 +6,22 @@ import Testing
 nonisolated struct ChunkingCase: Sendable {
     let blockSizes: [Int]
     let chunkCount: Int
+}
+
+private final class FakePreferenceStore: PreferenceStore {
+    private var values = [String: Any]()
+
+    func string(forKey defaultName: String) -> String? {
+        values[defaultName] as? String
+    }
+
+    func data(forKey defaultName: String) -> Data? {
+        values[defaultName] as? Data
+    }
+
+    func set(_ value: Any?, forKey defaultName: String) {
+        values[defaultName] = value
+    }
 }
 
 nonisolated private struct FakeFailure: Error {}
@@ -70,10 +87,11 @@ struct CaptionerTests {
     private let source = FakeAudioSource()
     private let transcriber = FakeTranscriber()
     private let caption = CaptionState()
+    private let preferences = Preferences(store: FakePreferenceStore())
     private let captioner: Captioner
 
     init() {
-        captioner = Captioner(source: source, transcriber: transcriber, caption: caption)
+        captioner = Captioner(source: source, transcriber: transcriber, caption: caption, preferences: preferences)
     }
 
     @Test
@@ -120,7 +138,7 @@ struct CaptionerTests {
 
     @Test(arguments: [Language.english, .german, nil])
     func `the selected language reaches the transcriber`(_ language: Language?) async {
-        captioner.language = language
+        preferences.language = language
         source.emit(blockSizes: [SpeechFormat.samplesPerChunk])
         source.end()
 
@@ -202,7 +220,7 @@ struct CaptionerTests {
 
     @Test
     func `a source that fails to start leaves captions unavailable`() async {
-        let failing = Captioner(source: FakeAudioSource(failure: FakeFailure()), transcriber: transcriber, caption: caption)
+        let failing = Captioner(source: FakeAudioSource(failure: FakeFailure()), transcriber: transcriber, caption: caption, preferences: preferences)
 
         await failing.start().value
 

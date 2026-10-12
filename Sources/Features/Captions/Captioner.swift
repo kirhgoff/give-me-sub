@@ -10,18 +10,19 @@ final class Captioner {
     private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "captioner")
 
     private(set) var isRunning = false
-    var language: Language?
     let caption: CaptionState
 
     private let source: any AudioSource
     private let transcriber: any Transcriber
+    private let preferences: Preferences
     @ObservationIgnored private var sessionTask: Task<Void, Never>?
     @ObservationIgnored private var flushTask: Task<Void, Never>?
 
-    init(source: any AudioSource = SystemAudioTap(), transcriber: any Transcriber = Whistle(), caption: CaptionState = CaptionState()) {
+    init(source: any AudioSource = SystemAudioTap(), transcriber: any Transcriber = Whistle(), caption: CaptionState = CaptionState(), preferences: Preferences = Preferences()) {
         self.source = source
         self.transcriber = transcriber
         self.caption = caption
+        self.preferences = preferences
     }
 
     func toggle() {
@@ -82,7 +83,7 @@ final class Captioner {
     private func transcribe(_ chunk: [Float]) async {
         guard !Task.isCancelled else { return }
         do {
-            let segment = try await transcriber.process(chunk, language: language)
+            let segment = try await transcriber.process(chunk, language: preferences.language)
             guard !Task.isCancelled, let segment else { return }
             caption.show(segment)
         } catch {
