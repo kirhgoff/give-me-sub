@@ -7,7 +7,7 @@ final class Captioner {
     static let captionsOff = "Captions off"
     static let captionsUnavailable = "Captions unavailable"
 
-    private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "captioner")
+    private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "captioner")
 
     private(set) var isRunning = false
     var language: Language?

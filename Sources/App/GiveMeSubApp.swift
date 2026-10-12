@@ -3,7 +3,7 @@ import SwiftUI
 import os
 
 @main struct GiveMeSubApp: App {
-    private static let logger = Logger(subsystem: "com.kirill.givemesub", category: "launch-at-login")
+    private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "launch-at-login")
 
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
