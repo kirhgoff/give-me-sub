@@ -35,6 +35,7 @@ final class CaptionState {
     }
 
     func showSubtitle(_ text: String) {
+        guard !text.allSatisfy(\.isWhitespace) else { return }
         timeline.append(text, at: .now)
         presentSubtitles()
     }

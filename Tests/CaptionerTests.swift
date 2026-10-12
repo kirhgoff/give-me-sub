@@ -170,8 +170,9 @@ struct CaptionerTests {
         source.emit(blockSizes: [SpeechFormat.samplesPerChunk])
         let session = captioner.start()
 
-        await waitForCommitted { $0 == "Hello there." }
+        await waitForCommitted { $0.hasSuffix("there.") }
 
+        #expect(caption.committed == "Hello there.")
         #expect(caption.pending.isEmpty)
         captioner.stop()
         await session.value

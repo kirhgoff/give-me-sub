@@ -20,7 +20,7 @@ Apple silicon, macOS 26+. Releases are Developer ID signed and notarized. Upgrad
 
 ## Use
 
-Play anything with audio, click the menu bar icon > Start captions. Pick a language in the menu or in Settings… (English by default; Auto detects). Settings… also sets the caption font, size, bold, colour and background, applied live. Settings… > Mode: Rolling shows a live running line; Subtitles shows whole sentences one at a time, each held long enough to read.
+Play anything with audio, click the menu bar icon > Start captions. Pick a language in the menu or in Settings… (English by default; Auto detects). Settings… also sets the caption font, size, bold, colour and background, applied live. Settings… > Mode: Rolling shows a live running line; Subtitles shows whole sentences one at a time, each held long enough to read (shortened when speech outruns reading, so they never lag more than a few seconds).
 
 ## Hotkey
 

@@ -5,4 +5,5 @@ nonisolated struct CaptionTiming {
     var cueMinimum = Duration.milliseconds(1500)
     var cueMaximum = Duration.milliseconds(3500)
     var cueIdleRelease = Duration.seconds(2)
+    var cueMaximumDelay = Duration.milliseconds(3500)
 }

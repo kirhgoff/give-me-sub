@@ -14,7 +14,9 @@ nonisolated struct SubtitleTimeline {
     }
 
     mutating func append(_ text: String, at now: Instant) {
-        for word in text.split(whereSeparator: \.isWhitespace) {
+        let newWords = text.split(whereSeparator: \.isWhitespace)
+        guard !newWords.isEmpty else { return }
+        for word in newWords {
             words.append(String(word))
             if words.count == Self.maxWords || word.last.map(Self.sentenceEndings.contains) == true {
                 release(at: now)
@@ -41,7 +43,7 @@ nonisolated struct SubtitleTimeline {
 
     private mutating func release(at now: Instant) {
         guard !words.isEmpty else { return }
-        let start = max(now, cues.last?.end ?? now)
+        let start = min(max(now, cues.last?.end ?? now), now + timing.cueMaximumDelay)
         cues.append(Cue(text: words.joined(separator: " "), start: start, end: start + readingTime(wordCount: words.count)))
         words.removeAll()
         lastWordAt = nil
