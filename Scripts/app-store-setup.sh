@@ -281,6 +281,7 @@ step "Add the screenshots."
 step "App Information: Category Utilities. Age Rating questionnaire: answer None to all."
 step "Pricing and Availability: Free."
 step "Build: select the TestFlight build from stage 7."
+note "No build listed yet? Push a v* tag (it also publishes the brew release), wait for TestFlight, then come back."
 step "Add for Review."
 confirm "Everything filled in and ready to press Submit for Review?" || warn "Submit later from the app version page."
 
