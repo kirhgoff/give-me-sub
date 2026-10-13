@@ -6,7 +6,7 @@ import SwiftUI
     private var captioner: Captioner { delegate.captioner }
 
     var body: some Scene {
-        MenuBarExtra("GiveMeSub", systemImage: statusIcon) {
+        MenuBarExtra("GiveMeSub", image: statusIcon) {
             toggleButton
             LanguagePicker(selection: Bindable(delegate.preferences).language)
             SettingsButton()
@@ -19,7 +19,7 @@ import SwiftUI
     }
 
     private var statusIcon: String {
-        captioner.isRunning ? "captions.bubble.fill" : "captions.bubble"
+        captioner.isRunning ? "MenuBarIcon" : "MenuBarIconOff"
     }
 
     private var toggleButton: some View {
