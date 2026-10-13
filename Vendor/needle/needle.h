@@ -60,8 +60,10 @@ NEEDLE_API void needle_set_audio(
 
 NEEDLE_API void needle_reset(void);
 
-/* Transcribes 16 kHz mono float PCM in [-1, 1], at most 30 s, and returns the
-   number of tokens generated. language is "en", "de", "fr", "es", "it", "nl" or
+/* Transcribes 16 kHz mono float PCM in [-1, 1] of any length and returns the
+   number of tokens in the transcript. Up to 30 s runs as one pass; longer audio
+   runs as consecutive 30 s windows, each decoded once and cut at its last
+   sentence end, with word times counted from the start of the clip. language is "en", "de", "fr", "es", "it", "nl" or
    "pl", or NULL to detect it. keywords is NULL or newline-separated words and
    phrases for keyword biasing. out receives JSON with the transcript, the
    language used, the milliseconds to the first token and the decoder's tokens
@@ -80,8 +82,8 @@ NEEDLE_API int needle_transcribe(
 );
 
 /* Live transcription: appends 16 kHz mono float PCM, about one second at a
-   time and at most 30 s per call, re-transcribes the buffered audio and commits
-   the words two consecutive passes agree on. language and keywords are as in
+   time, re-transcribes the buffered audio and commits the words two consecutive
+   passes agree on; a feed longer than 30 s is taken in one-second pieces. language and keywords are as in
    needle_transcribe. out receives the words this call committed, with times in
    seconds from the start of the stream, and the unconfirmed tail; returns the
    number of words committed:
