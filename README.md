@@ -39,6 +39,8 @@ Settings… > "Launch at login" registers the app via SMAppService (System Setti
 One-time: `Scripts/setup-release.sh` (Developer ID .p12, notary API key, TAP_TOKEN -> GitHub secrets; `APPLE_TEAM_ID` repo variable and `.env`).
 Then: `git tag v0.1.0 && git push origin v0.1.0`. `.github/workflows/release.yml` archives with Developer ID + hardened runtime, notarizes, staples, publishes `GiveMeSub.zip` to the GitHub Release and bumps `Casks/give-me-sub.rb` in kirhgoff/homebrew-tap. Version = tag. Runner is `xcode-27` (preview); switch `runs-on` to `macos-26` if it queues or breaks.
 
+Mac App Store: run `Scripts/app-store-setup.sh` once (agreement, App ID, app record, privacy, Xcode Cloud workflow, listing; writes `ASC_APP_ID` and `PRIVACY_POLICY_URL` to `.env`, no secrets). After that a `v*` tag builds for both channels: GitHub release and Xcode Cloud to TestFlight.
+
 Local signed build:
 
 ```
