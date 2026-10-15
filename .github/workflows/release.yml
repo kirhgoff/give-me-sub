@@ -31,7 +31,7 @@ jobs:
         run: |
           v=${GITHUB_REF_NAME#v}
           xcodebuild archive -project GiveMeSub.xcodeproj -scheme GiveMeSub -configuration Release -archivePath build/GiveMeSub.xcarchive \
-            CODE_SIGN_IDENTITY="Developer ID Application" DEVELOPMENT_TEAM="${{ vars.APPLE_TEAM_ID }}" OTHER_CODE_SIGN_FLAGS=--timestamp \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" DEVELOPMENT_TEAM="${{ vars.APPLE_TEAM_ID }}" OTHER_CODE_SIGN_FLAGS=--timestamp \
             MARKETING_VERSION="$v" CURRENT_PROJECT_VERSION="$v"
           codesign --verify --deep --strict --verbose=2 "$APP"
       - name: Notarize and staple
