@@ -14,6 +14,8 @@ struct SettingsView: View {
     static let textColorTitle = "Text colour"
     static let backgroundTitle = "Background opacity"
     static let generalSection = "General"
+    static let privacyPolicyTitle = "Privacy policy"
+    static let privacyPolicyURL = URL(string: "https://github.com/kirhgoff/give-me-sub/blob/main/PRIVACY.md")!
     static let appearanceSection = "Captions"
     static let opacityRange = 0.0...1.0
 
@@ -36,6 +38,7 @@ struct SettingsView: View {
         Section(Self.generalSection) {
             launchAtLoginToggle
             LanguagePicker(selection: $preferences.language)
+            privacyPolicyLink
         }
     }
 
@@ -52,6 +55,10 @@ struct SettingsView: View {
 
     private var launchAtLoginToggle: some View {
         Toggle(Self.launchAtLoginTitle, isOn: Binding(get: { launchAtLogin }, set: setLaunchAtLogin))
+    }
+
+    private var privacyPolicyLink: some View {
+        Link(Self.privacyPolicyTitle, destination: Self.privacyPolicyURL)
     }
 
     private var modePicker: some View {
