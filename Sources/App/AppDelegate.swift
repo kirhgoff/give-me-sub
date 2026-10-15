@@ -10,8 +10,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let overlay: CaptionOverlay
     private let hotKey = GlobalHotKey()
     private var hotKeyTask: Task<Void, Never>?
+    private let singleInstance: SingleInstanceGate
+    private var keepsRunning = true
 
-    override init() {
+    override convenience init() {
+        self.init(singleInstance: SingleInstanceGate())
+    }
+
+    init(singleInstance: SingleInstanceGate) {
+        self.singleInstance = singleInstance
         let preferences = Preferences()
         let captioner = Captioner(preferences: preferences)
         self.preferences = preferences
@@ -21,7 +28,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         super.init()
     }
 
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        keepsRunning = singleInstance.launch()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard keepsRunning else {
+            NSApplication.shared.terminate(nil)
+            return
+        }
         hotKey.register()
         let presses = hotKey.presses
         hotKeyTask = Task { [weak self] in
@@ -33,6 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
+        guard !singleInstance.forward(urls) else { return }
         for url in urls {
             guard let command = url.host().flatMap(LinkCommand.init(rawValue:)) else {
                 Self.logger.error("unknown link: \(url.absoluteString, privacy: .public)")
