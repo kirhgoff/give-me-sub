@@ -49,7 +49,7 @@ xcodebuild archive -project GiveMeSub.xcodeproj -scheme GiveMeSub -archivePath b
 
 Product > Test (`GiveMeSubTests`); it synthesizes speech with `say` and checks the transcript.
 
-Xcode Cloud runs the same build and tests on pull requests and `main`. `ci_scripts/ci_post_clone.sh` installs XcodeGen, fetches the vendor files and generates the project first.
+Xcode Cloud's Default workflow builds and tests pull requests; its Release workflow archives `main` and `v*` tags and uploads to TestFlight. The App Store version comes from the tag, and submission to review is manual in App Store Connect. `ci_scripts/ci_post_clone.sh` installs XcodeGen, fetches the vendor files and generates the project first.
 
 ## Known limits
 
