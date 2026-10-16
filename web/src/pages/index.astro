@@ -1,42 +1,110 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const demo = 'so we rowed out before dawn and the fog lifted just as the sun came up'.split(' ');
+
+const scenes = [
+  { label: 'A French film, no subtitles', line: 'et maintenant, on fait quoi ?' },
+  { label: 'A muffled call', line: 'can everyone see my screen? hello?' },
+  { label: 'A loud café', line: 'the quarterly numbers are on slide four' },
+  { label: 'A lecture at 2×', line: 'which brings us to the second law' },
+];
+
+const steps = [
+  { title: 'Your Mac plays something', body: 'Any app, tab, call or game. GiveMeSub taps system audio with a Core Audio process tap, so there is nothing to route or configure.' },
+  { title: 'A model on your Mac listens', body: 'The bundled Whistle speech model transcribes on-device. No network, no account, no audio ever written to disk.' },
+  { title: 'Captions float above everything', body: 'A small overlay sits above every window, fullscreen apps included. Rolling shows a running line; Subtitles shows whole sentences.' },
+];
+
+const facts = [
+  ['Languages', 'English, German, French, Spanish, Italian, Dutch, Polish or Auto'],
+  ['Hotkey', '⌃⌥⌘C from anywhere, plus Shortcuts and givemesub:// links'],
+  ['Appearance', 'Font, size, bold, colour and background, applied live'],
+  ['Privacy', 'No servers, accounts, analytics or tracking'],
+];
 ---
 
 <Layout
-  title="GiveMeSub — live on-device captions for your Mac"
+  title="GiveMeSub — subtitles for everything your Mac plays"
   description="A macOS menu bar app that captions whatever your Mac plays. Transcribed on-device, shown in a floating overlay above every window, fullscreen apps included."
 >
   <header class="hero">
-    <img src="/icon.png" alt="" width="112" height="112" />
-    <h1>GiveMeSub</h1>
-    <p class="pitch">Live on-device captions for whatever your Mac plays.</p>
-    <div class="screen" role="img" aria-label="A caption overlay floating over a video">
-      <p class="caption">so we rowed out before dawn, and the fog just <span class="pending">lifted</span></p>
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/icon.png" alt="" width="40" height="40" />GiveMeSub<span>for macOS</span></a>
+      <h1>Subtitles for everything your Mac plays.</h1>
+      <p class="pitch">A menu bar app that listens to your Mac and captions it live, on your Mac, in an overlay above every window. Nothing leaves the device.</p>
+      <p class="cta">
+        <a class="button" href="#install">Install with Homebrew</a>
+        <span class="soon">Mac App Store: coming soon</span>
+      </p>
+    </div>
+    <div class="wrap">
+      <div class="desktop" role="img" aria-label={`A Mac desktop with the GiveMeSub glyph in the menu bar, a video window, and a caption overlay floating above it reading: ${demo.join(' ')}`}>
+        <div class="menubar" aria-hidden="true">
+          <span class="apple"></span><b>QuickTime Player</b><span>File</span><span>Edit</span><span>View</span><span>Window</span>
+          <svg class="glyph" width="18" height="18" viewBox="0 0 18 18"><path d="M1,9.2 C2.6,6.6 5.2,4.4 7.1,4.4 C8.1,4.4 8.5,5.8 9,5.8 C9.5,5.8 9.9,4.4 10.9,4.4 C12.8,4.4 15.4,6.6 17,9.2 C15.2,12.3 12.4,14 9,14 C7.6,14 6.3,13.7 5.2,13.2 L2.4,16 L3.2,11.9 C2.3,11.1 1.6,10.2 1,9.2 Z M3.5,9.2 C5.2,7.5 7,6.9 9,6.9 C11,6.9 12.8,7.5 14.5,9.2 C12.8,10.9 11,11.5 9,11.5 C7,11.5 5.2,10.9 3.5,9.2 Z" fill="currentColor" fill-rule="evenodd"/><circle cx="9" cy="9.2" r="1.4" fill="currentColor"/></svg>
+          <span class="clock">Thu 21:04</span>
+        </div>
+        <div class="window" aria-hidden="true">
+          <div class="titlebar"><i></i><i></i><i></i></div>
+          <div class="film"></div>
+        </div>
+        <p class="caption live" aria-hidden="true">
+          {demo.map((word, i) => <span style={`--i:${i}`}>{word}</span>)}
+        </p>
+      </div>
     </div>
   </header>
 
-  <section class="features">
-    <div>
-      <h2>Private by design</h2>
-      <p>Audio is transcribed on your Mac by a bundled speech model. Nothing leaves the device: no servers, no accounts, no analytics.</p>
-    </div>
-    <div>
-      <h2>Everything that plays</h2>
-      <p>Taps all system audio, so any app, tab, call or game gets captions. The overlay floats above every window, fullscreen included.</p>
-    </div>
-    <div>
-      <h2>Your pace, your language</h2>
-      <p>Rolling shows a live running line; Subtitles shows whole sentences, held long enough to read. English, German, French, Spanish, Italian, Dutch, Polish, or Auto.</p>
+  <section class="scenes">
+    <div class="wrap">
+      <h2>Made for the moments you miss a line.</h2>
+      <ul>
+        {scenes.map(({ label, line }) => (
+          <li>
+            <div class="still" aria-hidden="true"><p class="caption">{line}</p></div>
+            <h3>{label}</h3>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
-  <section class="install">
-    <h2>Install</h2>
-    <pre><code>brew tap kirhgoff/tap &amp;&amp; brew trust --tap kirhgoff/tap
+  <section class="how">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <ol>
+        {steps.map(({ title, body }) => (
+          <li>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="facts">
+    <div class="wrap">
+      <dl>
+        {facts.map(([term, detail]) => (
+          <div>
+            <dt>{term}</dt>
+            <dd>{detail}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="wrap">
+      <h2>Install</h2>
+      <pre><code>brew tap kirhgoff/tap &amp;&amp; brew trust --tap kirhgoff/tap
 brew install --cask kirhgoff/tap/give-me-sub</code><button type="button" class="copy" aria-label="Copy install commands">Copy</button></pre>
-    <p>Apple silicon, macOS 26 or later. Releases are Developer ID signed and notarized.</p>
-    <p>Toggle with <kbd>⌃⌥⌘C</kbd>.</p>
-    <p>Mac App Store: coming soon.</p>
+      <p>Apple silicon, macOS 26 or later. Releases are Developer ID signed and notarized. Open source under MIT.</p>
+      <p>Then play anything, click the glyph in the menu bar and choose Start captions, or press <kbd>⌃⌥⌘C</kbd>.</p>
+    </div>
   </section>
 
   <script is:inline>

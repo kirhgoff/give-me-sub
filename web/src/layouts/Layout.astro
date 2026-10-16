@@ -16,10 +16,15 @@ const icon = new URL('/icon.png', Astro.site);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffd21e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/icon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" />
     <title>{title}</title>
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
@@ -28,14 +33,17 @@ const icon = new URL('/icon.png', Astro.site);
     <meta property="og:image" content={icon} />
   </head>
   <body>
-    <main>
-      <slot />
-      <footer>
-        <a href="https://github.com/kirhgoff/give-me-sub">GitHub</a>
-        <a href="https://github.com/kirhgoff/give-me-sub/issues/new">Report a problem</a>
-        <a href="/privacy">Privacy</a>
-        <a href="https://kirhgoff.me">kirhgoff.me</a>
-      </footer>
-    </main>
+    <slot />
+    <footer>
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/icon.png" alt="" width="28" height="28" />GiveMeSub</a>
+        <nav aria-label="Footer">
+          <a href="https://github.com/kirhgoff/give-me-sub">GitHub</a>
+          <a href="https://github.com/kirhgoff/give-me-sub/issues/new">Report a problem</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://kirhgoff.me">kirhgoff.me</a>
+        </nav>
+      </div>
+    </footer>
   </body>
 </html>
