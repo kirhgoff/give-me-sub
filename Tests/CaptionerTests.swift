@@ -47,9 +47,9 @@ private final class FakeAudioSource: AudioSource {
         continuation.finish()
     }
 
-    func emit(blockSizes: [Int]) {
+    func emit(blockSizes: [Int], level: Float = 0) {
         for size in blockSizes {
-            continuation.yield([Float](repeating: 0, count: size))
+            continuation.yield([Float](repeating: level, count: size))
         }
     }
 
@@ -84,6 +84,7 @@ private actor FakeTranscriber: Transcriber {
 }
 
 struct CaptionerTests {
+    private let audible: Float = 0.5
     private let source = FakeAudioSource()
     private let transcriber = FakeTranscriber()
     private let caption = CaptionState()
@@ -231,6 +232,40 @@ struct CaptionerTests {
         #expect(!captioner.isRunning)
         #expect(caption.committed == Captioner.captionsOff)
         #expect(source.stopCount == 1)
+    }
+
+    @Test
+    func `a session that hears only silence stops itself`() async {
+        source.emit(blockSizes: Array(repeating: SpeechFormat.samplesPerChunk, count: Captioner.silentChunksBeforeWarning))
+
+        await captioner.start().value
+
+        #expect(!captioner.isRunning)
+        #expect(source.stopCount == 1)
+        #expect(await transcriber.chunks.count == Captioner.silentChunksBeforeWarning - 1)
+    }
+
+    @Test
+    func `the silence warning outlives the captions-off flash`() async {
+        source.emit(blockSizes: Array(repeating: SpeechFormat.samplesPerChunk, count: Captioner.silentChunksBeforeWarning))
+
+        await captioner.start().value
+
+        #expect(caption.committed == Captioner.noSoundWarning)
+        #expect(caption.pending.isEmpty)
+        #expect(caption.isVisible)
+    }
+
+    @Test
+    func `silence after sound is not a warning`() async {
+        source.emit(blockSizes: [SpeechFormat.samplesPerChunk], level: audible)
+        source.emit(blockSizes: Array(repeating: SpeechFormat.samplesPerChunk, count: Captioner.silentChunksBeforeWarning))
+        source.end()
+
+        await captioner.start().value
+
+        #expect(caption.committed == Captioner.captionsOff)
+        #expect(await transcriber.chunks.count == Captioner.silentChunksBeforeWarning + 1)
     }
 
     @Test

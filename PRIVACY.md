@@ -1,6 +1,6 @@
 # GiveMeSub Privacy Policy
 
-Effective 14 October 2026.
+Effective 16 October 2026.
 
 GiveMeSub shows live captions for audio playing on your Mac. It is built to work entirely on your device.
 
@@ -14,6 +14,7 @@ GiveMeSub shows live captions for audio playing on your Mac. It is built to work
 - Audio is transcribed on your Mac by a speech model bundled with the app.
 - Audio and captions are kept in memory only while shown, and are never saved to disk.
 - Nothing is sent over the network. GiveMeSub has no servers, accounts, analytics, advertising or tracking, and shares no data with third parties.
+- **Report a Problem…** opens a GitHub issue draft in your browser with the app version, macOS version, Mac model, your caption settings and the app's recent log lines. Nothing is sent unless you submit it, and submitted issues are public, so edit out anything you'd rather not share.
 
 ## Your control
 
