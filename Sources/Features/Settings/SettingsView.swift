@@ -15,7 +15,7 @@ struct SettingsView: View {
     static let backgroundTitle = "Background opacity"
     static let generalSection = "General"
     static let privacyPolicyTitle = "Privacy policy"
-    static let privacyPolicyURL = URL(string: "https://github.com/kirhgoff/give-me-sub/blob/main/PRIVACY.md")!
+    static let privacyPolicyURL = URL(string: "https://give-me-sub.kirhgoff.me/privacy")!
     static let appearanceSection = "Captions"
     static let opacityRange = 0.0...1.0
 
