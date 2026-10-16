@@ -22,6 +22,9 @@ Apple silicon, macOS 26+. Releases are Developer ID signed and notarized. Upgrad
 
 Play anything with audio, click the menu bar icon > Start captions. Pick a language in the menu or in Settings… (English by default; Auto detects). Settings… also sets the caption font, size, bold, colour and background, applied live. Settings… > Mode: Rolling shows a live running line; Subtitles shows whole sentences one at a time, each held long enough to read (shortened when speech outruns reading, so they never lag more than a few seconds).
 
+If nothing shows for 10 s after starting, the overlay says no sound is reaching GiveMeSub and captions stop: play something, or allow the app under System Settings › Privacy & Security › Screen & System Audio Recording.
+Report a Problem… in the menu opens a prefilled GitHub issue with the app version, macOS, Mac model, current settings and the app's recent log lines.
+
 ## Hotkey
 
 ⌃⌥⌘C toggles captions from anywhere (registered at launch, no permission needed). If macOS refuses the combo (a reserved shortcut), the app logs `hotkey ⌃⌥⌘C unavailable` (category `hotkey`) and the links below still work. macOS does not report a combo another app also registered: if ⌃⌥⌘C does nothing, use a link below.

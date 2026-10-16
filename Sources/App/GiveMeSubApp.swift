@@ -10,6 +10,7 @@ import SwiftUI
             toggleButton
             LanguagePicker(selection: Bindable(delegate.preferences).language)
             SettingsButton()
+            ReportProblemButton(isRunning: captioner.isRunning, preferences: delegate.preferences)
             Divider()
             quitButton
         }

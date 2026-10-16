@@ -6,6 +6,9 @@ final class Captioner {
     static let captionsOn = "Captions on"
     static let captionsOff = "Captions off"
     static let captionsUnavailable = "Captions unavailable"
+    static let noSoundWarning = "No sound reaching GiveMeSub. Play something, or allow it in System Settings › Privacy & Security › Screen & System Audio Recording."
+    static let silentChunksBeforeWarning = 10
+    static let silenceAmplitude: Float = 0.001
 
     private static let logger = Logger(subsystem: "com.kirhgoff.givemesub", category: "captioner")
 
@@ -71,8 +74,20 @@ final class Captioner {
         }
         caption.flash(Self.captionsOn)
         var chunker = SampleChunker()
+        var chunkCount = 0
+        var heardSound = false
         for await block in blocks {
             for chunk in chunker.append(block) {
+                chunkCount += 1
+                heardSound = heardSound || !Self.isSilent(chunk)
+                if !heardSound, chunkCount >= Self.silentChunksBeforeWarning {
+                    guard !Task.isCancelled else { return }
+                    Self.logger.error("no sound in the first \(chunkCount) chunks; stopping")
+                    let flush = stop()
+                    caption.warn(Self.noSoundWarning)
+                    await flush.value
+                    return
+                }
                 await transcribe(chunk)
             }
         }
@@ -100,5 +115,9 @@ final class Captioner {
         } catch {
             Self.logger.error("transcription flush failed: \(error, privacy: .public)")
         }
+    }
+
+    private static func isSilent(_ chunk: [Float]) -> Bool {
+        chunk.allSatisfy { abs($0) < silenceAmplitude }
     }
 }
