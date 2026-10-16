@@ -89,6 +89,7 @@ button:focus-visible {
 }
 
 .pitch {
+  text-wrap: balance;
   font-size: 21px;
   color: var(--muted);
   margin: 8px auto 32px;
