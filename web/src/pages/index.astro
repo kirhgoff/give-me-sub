@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="GiveMeSub — live on-device captions for your Mac"
+  description="A macOS menu bar app that captions whatever your Mac plays. Transcribed on-device, shown in a floating overlay above every window, fullscreen apps included."
+>
+  <header class="hero">
+    <img src="/icon.png" alt="" width="112" height="112" />
+    <h1>GiveMeSub</h1>
+    <p class="pitch">Live on-device captions for whatever your Mac plays.</p>
+    <div class="screen" role="img" aria-label="A caption overlay floating over a video">
+      <p class="caption">so we rowed out before dawn, and the fog just <span class="pending">lifted</span></p>
+    </div>
+  </header>
+
+  <section class="features">
+    <div>
+      <h2>Private by design</h2>
+      <p>Audio is transcribed on your Mac by a bundled speech model. Nothing leaves the device: no servers, no accounts, no analytics.</p>
+    </div>
+    <div>
+      <h2>Everything that plays</h2>
+      <p>Taps all system audio, so any app, tab, call or game gets captions. The overlay floats above every window, fullscreen included.</p>
+    </div>
+    <div>
+      <h2>Your pace, your language</h2>
+      <p>Rolling shows a live running line; Subtitles shows whole sentences, held long enough to read. English, German, French, Spanish, Italian, Dutch, Polish, or Auto.</p>
+    </div>
+  </section>
+
+  <section class="install">
+    <h2>Install</h2>
+    <pre><code>brew tap kirhgoff/tap &amp;&amp; brew trust --tap kirhgoff/tap
+brew install --cask kirhgoff/tap/give-me-sub</code><button type="button" class="copy" aria-label="Copy install commands">Copy</button></pre>
+    <p>Apple silicon, macOS 26 or later. Releases are Developer ID signed and notarized.</p>
+    <p>Toggle with <kbd>⌃⌥⌘C</kbd>.</p>
+    <p>Mac App Store: coming soon.</p>
+  </section>
+
+  <script is:inline>
+    document.querySelector('.copy').addEventListener('click', async ({ target }) => {
+      await navigator.clipboard.writeText(document.querySelector('.install code').textContent);
+      target.textContent = 'Copied';
+      setTimeout(() => { target.textContent = 'Copy'; }, 1500);
+    });
+  </script>
+</Layout>

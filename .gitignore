@@ -9,3 +9,7 @@ build/
 DerivedData/
 .build/
 xcuserdata/
+web/node_modules/
+web/dist/
+web/.astro/
+web/.wrangler/
