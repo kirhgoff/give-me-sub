@@ -1,0 +1,41 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const icon = new URL('/icon.png', Astro.site);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <title>{title}</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={icon} />
+  </head>
+  <body>
+    <main>
+      <slot />
+      <footer>
+        <a href="https://github.com/kirhgoff/give-me-sub">GitHub</a>
+        <a href="https://github.com/kirhgoff/give-me-sub/issues/new">Report a problem</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://kirhgoff.me">kirhgoff.me</a>
+      </footer>
+    </main>
+  </body>
+</html>
