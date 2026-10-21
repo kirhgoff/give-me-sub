@@ -66,3 +66,7 @@ Before every commit, all must pass:
 3. Build and run the tests through the Xcode MCP server (its build and test tools, against the open project tab), never a raw `xcodebuild`.
 
 The Stop hook (`.claude/hooks/stop-check.sh`) runs steps 1 and 2 automatically when the tree is dirty; step 3 is on you.
+
+## Troubleshooting
+
+If the app quits about 1 s after launch ("Finished running"), Control Center refused its menu-bar icon: `defaults read com.kirhgoff.givemesub` shows `NSStatusItem VisibleCC Item-0 = 0`. Suggest a Mac restart before debugging the code.
