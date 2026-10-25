@@ -60,11 +60,11 @@ Add each only when its trigger fires, in its own PR.
 
 ## Checks
 
-Before every commit, `mise run lint` must pass: swiftlint `--strict`, shellcheck, typos, betterleaks, actionlint, zizmor and agnix.
+Before every commit, run `xcodegen generate` if `project.yml` changed, and `mise run lint` must pass: swiftlint `--strict`, shellcheck, typos, betterleaks, actionlint, zizmor and agnix.
 
 `mise run check` runs the same steps plus `Scripts/test.sh` (xcodegen, then `xcodebuild test`), and CI runs exactly that on every PR. Locally, build and run the tests through the Xcode MCP server (its build and test tools, against the open project tab), never a raw `xcodebuild`.
 
-The Stop hook (`.claude/hooks/stop-check.sh`) runs `mise run lint` when the tree is dirty.
+The Stop hook (`.claude/hooks/stop-check.sh`) runs both when the tree is dirty.
 
 ## Troubleshooting
 
