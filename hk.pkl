@@ -1,0 +1,46 @@
+amends "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Builtins.pkl"
+
+local fast = new Mapping<String, Step> {
+    ["betterleaks"] = Builtins.betterleaks
+    ["typos"] = Builtins.typos
+    ["actionlint"] = Builtins.actionlint
+    ["zizmor"] = Builtins.zizmor
+    ["shellcheck"] {
+        glob = List("Scripts/*.sh", "ci_scripts/*.sh", ".claude/hooks/*.sh")
+        check = "shellcheck {{ files }}"
+    }
+    ["swiftlint"] {
+        glob = List("**/*.swift", ".swiftlint.yml")
+        check = "swiftlint lint --strict --quiet"
+    }
+    ["agnix"] {
+        glob = List("AGENTS.md", "CLAUDE.md", ".claude/**", ".agents/**")
+        check = "agnix ."
+    }
+}
+
+local all = (fast) {
+    ["xcodebuild_test"] {
+        glob = List("Sources/**", "Tests/**", "project.yml", "Vendor/NOTICE")
+        check = "Scripts/test.sh"
+    }
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps = fast
+    }
+    ["pre-push"] {
+        steps = all
+    }
+    ["check"] {
+        steps = all
+    }
+    ["fix"] {
+        fix = true
+        steps = all
+    }
+}
