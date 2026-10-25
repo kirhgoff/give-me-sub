@@ -16,7 +16,7 @@ local fast = new Mapping<String, Step> {
     }
     ["agnix"] {
         glob = List("AGENTS.md", "CLAUDE.md", ".claude/**", ".agents/**")
-        check = "agnix --strict ."
+        check = "agnix --strict . && agnix --strict .claude/skills/*/SKILL.md"
     }
 }
 
