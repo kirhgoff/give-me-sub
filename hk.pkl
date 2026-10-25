@@ -34,7 +34,7 @@ hooks {
         steps = fast
     }
     ["pre-push"] {
-        steps = all
+        steps = fast
     }
     ["check"] {
         steps = all
