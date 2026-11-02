@@ -1,6 +1,6 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
-root=${0:A:h:h}
+root=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$root/Vendor/needle"
 curl -L --fail -o "$root/Vendor/needle/libneedle.a" https://huggingface.co/Cactus-Compute/needle3/resolve/main/macos-arm64/libneedle.a
 curl -L --fail -o "$root/Vendor/needle/needle.h"    https://huggingface.co/Cactus-Compute/needle3/resolve/main/macos-arm64/needle.h

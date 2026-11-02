@@ -10,7 +10,9 @@ jobs:
     env:
       APP: build/GiveMeSub.xcarchive/Products/Applications/GiveMeSub.app
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: brew install xcodegen
       - run: Scripts/fetch-vendor.sh
       - run: xcodegen generate
@@ -28,10 +30,12 @@ jobs:
           security list-keychains -d user -s build.keychain login.keychain
           rm cert.p12
       - name: Archive
+        env:
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
         run: |
           v=${GITHUB_REF_NAME#v}
           xcodebuild archive -project GiveMeSub.xcodeproj -scheme GiveMeSub -configuration Release -archivePath build/GiveMeSub.xcarchive \
-            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" DEVELOPMENT_TEAM="${{ vars.APPLE_TEAM_ID }}" OTHER_CODE_SIGN_FLAGS=--timestamp \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" DEVELOPMENT_TEAM="$TEAM_ID" OTHER_CODE_SIGN_FLAGS=--timestamp \
             MARKETING_VERSION="$v" CURRENT_PROJECT_VERSION="$v"
           codesign --verify --deep --strict --verbose=2 "$APP"
       - name: Notarize and staple
@@ -51,7 +55,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" GiveMeSub.zip --generate-notes
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
         with:
           repository: kirhgoff/homebrew-tap
           token: ${{ secrets.TAP_TOKEN }}
