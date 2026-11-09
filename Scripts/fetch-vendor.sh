@@ -1,6 +1,6 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
-root=${0:A:h:h}
+root=$(cd "$(dirname "$0")/.." && pwd)
 needle_base=https://huggingface.co/Cactus-Compute/needle3/resolve/93e88ede867e4311c39151285e74df513e4b835b/macos-arm64
 mkdir -p "$root/Vendor/needle"
 fetch() {
