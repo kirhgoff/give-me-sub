@@ -22,9 +22,29 @@ const facts = [
   ['Appearance', 'Font, size, bold, colour and background, applied live'],
   ['Privacy', 'No servers, accounts, analytics or tracking'],
 ];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'GiveMeSub',
+  applicationCategory: 'MultimediaApplication',
+  operatingSystem: 'macOS 26 or later',
+  description: 'A macOS menu bar app that captions whatever your Mac plays, transcribed on-device.',
+  url: 'https://give-me-sub.kirhgoff.me',
+  codeRepository: 'https://github.com/kirhgoff/give-me-sub',
+  sameAs: ['https://github.com/kirhgoff/give-me-sub'],
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: {
+    '@type': 'Person',
+    name: 'Kirill Lastovirya',
+    url: 'https://kirhgoff.me',
+    sameAs: ['https://github.com/kirhgoff', 'https://www.linkedin.com/in/kirhgoff', 'https://x.com/kirhgoff'],
+  },
+};
 ---
 
 <Layout
+  jsonLd={jsonLd}
   title="GiveMeSub — subtitles for everything your Mac plays"
   description="A macOS menu bar app that captions whatever your Mac plays. Transcribed on-device, shown in a floating overlay above every window, fullscreen apps included."
 >

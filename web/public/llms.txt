@@ -1,0 +1,12 @@
+# GiveMeSub
+
+> A macOS menu bar app that captions whatever your Mac plays. It taps system audio, transcribes it on-device with a bundled speech model, and shows the words in a floating overlay above every window, fullscreen apps included. No servers, accounts or tracking. Open source under MIT.
+
+## Pages
+
+- [Home](https://give-me-sub.kirhgoff.me/): what it does, how it works, install with Homebrew
+
+## Links
+
+- [Source code](https://github.com/kirhgoff/give-me-sub)
+- [Author: Kirill Lastovirya](https://kirhgoff.me)

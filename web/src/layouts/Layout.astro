@@ -4,11 +4,14 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description: string;
+  noindex?: boolean;
+  jsonLd?: object;
 }
 
-const { title, description } = Astro.props;
+const { title, description, noindex = false, jsonLd } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/(?:index)?\.html$/, ''), Astro.site);
-const icon = new URL('/icon.png', Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+const robots = noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large';
 ---
 
 <html lang="en">
@@ -19,9 +22,10 @@ const icon = new URL('/icon.png', Astro.site);
     <meta name="theme-color" content="#ffd21e" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/icon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" />
@@ -30,7 +34,17 @@ const icon = new URL('/icon.png', Astro.site);
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={icon} />
+    <meta property="og:site_name" content="GiveMeSub" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="GiveMeSub: subtitles for everything your Mac plays" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@kirhgoff" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
     <slot />
@@ -41,8 +55,8 @@ const icon = new URL('/icon.png', Astro.site);
           <a href="https://github.com/kirhgoff/give-me-sub">GitHub</a>
           <a href="https://github.com/kirhgoff/give-me-sub/issues/new">Report a problem</a>
           <a href="/privacy">Privacy</a>
-          <a href="https://kirhgoff.me">kirhgoff.me</a>
         </nav>
+        <p class="credit">Made by <a href="https://kirhgoff.me">Kirill Lastovirya</a></p>
       </div>
     </footer>
   </body>
