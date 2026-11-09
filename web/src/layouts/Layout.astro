@@ -23,7 +23,7 @@ const robots = noindex ? 'noindex, follow' : 'index, follow, max-image-preview:l
     <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="icon" href="/icon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,7 +31,7 @@ const robots = noindex ? 'noindex, follow' : 'index, follow, max-image-preview:l
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" />
     <title>{title}</title>
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="GiveMeSub" />
